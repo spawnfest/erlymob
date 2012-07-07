@@ -2,20 +2,21 @@
 -export([before_/1, landing_page/3, home/3]).
 
 before_(_) ->
-	AccessToken = boss_session:get_session_data(SessionID, access_token),
-	if
-		AccessToken == undefined ->
-			false;
-		true ->
-			true
-	end.
+    case boss_session:get_session_data(SessionID, access_token) of
+        undefined ->
+            {ok, false};
+        _ ->
+            {ok, true}
+    end.
 
-landing_page('GET', [], false) ->
-	{ok, []};
+
 landing_page('GET', [], true) ->
-	{redirect, [{action, "home"}]}.
+    {ok, []};
+landing_page('GET', [], false) ->
+    {redirect, [{action, "home"}]}.
+
 
 home('GET', [], true) ->
-	{ok, [{session_id, SessionID}]};
+    {ok, [{session_id, SessionID}]};
 home('GET', [], false) ->
-	{redirect, [{action, "landing_page"}]}.
+    {redirect, [{action, "landing_page"}]}.
