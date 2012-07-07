@@ -109,18 +109,18 @@ handle_delete(Path, Req, State) ->
     cowboy_http_req:reply(404, Req).   %% not found
 
 
--spec ejson_to_proplist({[{Name :: binary(), Value :: binary()}]}) -> proplists:proplist().
-ejson_to_proplist({Doc}) ->
-    ejson_to_proplist(Doc, []).
+% -spec ejson_to_proplist({[{Name :: binary(), Value :: binary()}]}) -> proplists:proplist().
+% ejson_to_proplist({Doc}) ->
+%     ejson_to_proplist(Doc, []).
 
-ejson_to_proplist([{Name, Value} | Tail], Acc) ->
-    %% FIXME We should be using binary_to_existing_atom/2 to convert the field
-    %%       names into atoms. Before we do that we must ensure that all the
-    %%       possible valid atoms are already in the atom table.
-    %% ejson_to_proplist(Tail, [{binary_to_existing_atom(Name, utf8), Value} | Acc]);
-    ejson_to_proplist(Tail, [{binary_to_atom(Name, utf8), Value} | Acc]);
-ejson_to_proplist([], Acc) ->
-    lists:reverse(Acc).
+% ejson_to_proplist([{Name, Value} | Tail], Acc) ->
+%     %% FIXME We should be using binary_to_existing_atom/2 to convert the field
+%     %%       names into atoms. Before we do that we must ensure that all the
+%     %%       possible valid atoms are already in the atom table.
+%     %% ejson_to_proplist(Tail, [{binary_to_existing_atom(Name, utf8), Value} | Acc]);
+%     ejson_to_proplist(Tail, [{binary_to_atom(Name, utf8), Value} | Acc]);
+% ejson_to_proplist([], Acc) ->
+%     lists:reverse(Acc).
 
 
 -spec printable_peer(Req :: term()) -> string().
