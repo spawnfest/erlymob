@@ -7,4 +7,16 @@
 %%% @end
 %%%-------------------------------------------------------------------
 
--type emob_error()                             :: {error, Reason :: term()}.
+-type error()                             :: {error, Reason :: term()}.
+-type emob_error()                        :: error().
+
+%% app_cache
+-type table()           :: atom().
+-type table_key()       :: any().
+-type table_version()   :: non_neg_integer().
+-type table_type()      :: atom().
+-type timestamp()       :: non_neg_integer().
+-type last_update()     :: timestamp().
+-type time_to_live()    :: non_neg_integer().
+
+-type app_field()                       :: atom().
