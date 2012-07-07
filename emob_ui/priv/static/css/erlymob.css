@@ -1,0 +1,57 @@
+body {
+  background: #eee;
+}
+
+.navbar .navbar-inner {
+  background: #fff;
+  color: #000;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  -ms-border-radius: 0;
+  -o-border-radius: 0;
+  border-radius: 0;
+  text-shadow: none;
+  padding: 20px 0 10px;
+}
+
+.navbar .navbar-inner .nav > li {
+  float: none;
+  display: block;
+  margin-bottom: 0;
+}
+
+.navbar .navbar-inner .nav > li > a {
+  text-shadow: none;
+  padding: 13px 15px;
+  font-size: 12px;
+  line-height: 24px;
+  color: #666;
+}
+
+.navbar .navbar-inner .nav > li .active > a, .navbar .navbar-inner .nav > li .active > a:hover, .navbar .navbar-inner .nav > li > a:hover {
+  color: #d80303;
+}
+
+.navbar .navbar-inner .nav-collapse.in ul:first-child {
+  margin-bottom: 0;
+}
+
+.navbar .navbar-inner .nav {
+  float: right;
+}
+
+.navbar .navbar-inner .nav li {
+  float: left;
+}
+
+.navbar .navbar-inner .nav.actions {
+  border-left: 1px solid #ddd;
+  margin-left: 20px;
+  padding-left: 20px;
+  float: right;
+}
+
+.navbar .navbar-inner .nav.actions li:last-child a {
+  font-weight: bold;
+  color: #000;
+}
