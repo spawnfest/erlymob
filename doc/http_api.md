@@ -52,6 +52,7 @@ Mob Stuff
 *Returns*: as above, but as an array.
 
 
+-----------------------------------------------------------------------
 *Path*: `/rsvp`
 
 *Function*: toggles the `going` tag on a particular mob, which signifies if I’m
