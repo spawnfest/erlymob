@@ -4,6 +4,7 @@ Erlymob HTTP API
 Mob Stuff
 ---------
 
+-----------------------------------------------------------------------
 *Path*: `/mob`
 
 *Function*: returns the object representation of the specified mob, including
@@ -20,7 +21,7 @@ Mob Stuff
     - `id`: the ID of the mob we want to retrieve.
 
 *Returns*:
-    ```javascript
+```javascript
     {
         "id": 12345,
         "tweet": "@erlymob Meet at Joe's in half an hour for free hot dogs!",
@@ -33,9 +34,10 @@ Mob Stuff
         "rsvps": 3,
         "going": false
     }
-    ```
+```
 
 
+-----------------------------------------------------------------------
 *Path*: `/mobs`
 
 *Function*: returns an array of all the upcoming mobs for which a user is eligible.
@@ -62,15 +64,16 @@ Mob Stuff
     - `id`: the ID of the mob we want to retrieve.
 
 *Returns*:
-    ```javascript
+```javascript
     {
         "going": true
     }
-    ```
+```
 
 User Stuff
 ----------
 
+-----------------------------------------------------------------------
 *Path*: `/set_loc`
 
 *Function*: sets the currently logged in user’s location.
@@ -84,6 +87,7 @@ User Stuff
     - `longitude`: longitude where the mob will take place.
 
 
+-----------------------------------------------------------------------
 *Path*: `/get_loc`
 
 *Function*: gets the currently logged in user’s most recent location.
@@ -95,9 +99,9 @@ User Stuff
                wish to retrieve.
 
 *Returns*:
-    ```javascript
+```javascript
     {
         "latitude": 33.786647,
         "longitude": -84.37853
     }
-    ```
+```
