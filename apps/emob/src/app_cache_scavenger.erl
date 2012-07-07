@@ -18,7 +18,7 @@
 -author('Tom Heinan <me@tomheinan.com>').
 
 
--compile({parse_transform,dynarec}).
+-compile([{parse_transform,dynarec}]).
 -compile([{parse_transform, lager_transform}]).
 
 -behaviour(gen_server).
