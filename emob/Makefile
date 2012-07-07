@@ -1,4 +1,4 @@
-APPLICATION := erlymob
+APPLICATION := emob
 
 ERL := erl
 EPATH := -pa ebin -pz deps/*/ebin
