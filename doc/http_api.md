@@ -4,7 +4,6 @@ Erlymob HTTP API
 Mob Stuff
 ---------
 
------------------------------------------------------------------------
 *Path*: `/mob`
 
 *Function*: returns the object representation of the specified mob, including
@@ -14,6 +13,7 @@ Mob Stuff
 *Method*: GET
 
 *Params*:
+
     - `token` (*optional*): the access token for the twitter API for the user
                           whose data we wish to retrieve. If there’s no token
                           given, we can return the mob, but the "going" flag
@@ -45,6 +45,7 @@ Mob Stuff
 *Method* GET
 
 *Params*: as above, but sans `id`, and the token is not optional.
+
     - `token`: the access token for the twitter API for the user whose data we
                wish to retrieve.
 
@@ -59,6 +60,7 @@ Mob Stuff
 *Method* POST
 
 *Params*:
+
     - `token`: the access token for the twitter API for the user whose data we
                wish to retrieve.
     - `id`: the ID of the mob we want to retrieve.
@@ -73,7 +75,6 @@ Mob Stuff
 User Stuff
 ----------
 
------------------------------------------------------------------------
 *Path*: `/set_loc`
 
 *Function*: sets the currently logged in user’s location.
@@ -81,6 +82,7 @@ User Stuff
 *Method* POST
 
 *Params*:
+
     - `token`: the access token for the twitter API for the user whose data we
                wish to retrieve.
     - `latitude`: latitude where the mob will take place.
@@ -95,6 +97,7 @@ User Stuff
 *Method* GET
 
 *Params*:
+
     - `token`: the access token for the twitter API for the user whose data we
                wish to retrieve.
 
