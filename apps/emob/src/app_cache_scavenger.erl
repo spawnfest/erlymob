@@ -128,7 +128,8 @@ code_change(_OldVsn, State, _Extra) ->
 -spec expired_entries(table()) -> [term()].
 expired_entries(Table) ->
     Now = app_cache:current_time_in_gregorian_seconds(),
-    TimestampPosition = get_position(timestamp, Table),
+%    TimestampPosition = get_position(timestamp, Table),
+    TimestampPosition = 3,
     TimeToLive = app_cache:cache_time_to_live(Table),
     MatchHead = '$1',
     Guard = [{'<', {element, TimestampPosition, '$1'}, Now - TimeToLive}],
