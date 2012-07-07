@@ -19,7 +19,8 @@
                   inets,
                   bstr,
                   cowboy,
-                  gproc
+                  gproc,
+                  twitterl
                  ]},
   {mod, {emob_app, []}},
   {env, []}
