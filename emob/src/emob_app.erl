@@ -25,6 +25,7 @@ start(_StartType, _StartArgs) ->
     app_cache:init(),
     app_cache_scavenger_sup:start_link(),
     emob_oauth_fsm_sup:start_link(),
+    emob_listener:start(),
     emob_sup:start_link().
 
 
