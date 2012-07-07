@@ -2,21 +2,15 @@
 -export([before_/1, landing_page/3, home/3]).
 
 before_(_) ->
-    case boss_session:get_session_data(SessionID, access_token) of
-        undefined ->
-            {ok, false};
-        _ ->
-            {ok, true}
-    end.
-
+	emob_ui_user:check_auth(SessionID).
 
 landing_page('GET', [], true) ->
-    {ok, []};
+	{redirect, [{action, "home"}]};
 landing_page('GET', [], false) ->
-    {redirect, [{action, "home"}]}.
+	{ok, []}.
 
 
-home('GET', [], true) ->
-    {ok, [{session_id, SessionID}]};
 home('GET', [], false) ->
-    {redirect, [{action, "landing_page"}]}.
+	{redirect, [{action, "landing_page"}]};
+home('GET', [], true) ->
+	{ok, [{session_id, SessionID}]}.
