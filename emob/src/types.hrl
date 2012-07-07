@@ -20,3 +20,15 @@
 -type time_to_live()    :: non_neg_integer().
 
 -type app_field()                       :: atom().
+
+%% Twitter
+-type token()                                 :: binary().
+-type secret()                                :: binary().
+-type status()                                :: binary().
+-type verifier()                              :: binary().
+-type url()                                   :: binary().
+-type method()                                :: atom().
+-type string_method()                         :: string().
+-type params()                                :: list().
+-type consumer()                              :: {string(), string(), atom()}.
+

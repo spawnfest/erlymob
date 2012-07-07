@@ -57,37 +57,31 @@
 start_link() ->
   gen_fsm:start_link(?MODULE, [], []).
 
-%% @doc Get a request token. Returns the JSON for [{token, Token}, {secret,Secret}]
+%% @doc Get a request token.
+-spec get_request_token(url()) -> #twitter_token_data{} | error().
 get_request_token(CallbackURL) ->
     {ok, Pid} = start_authorizer(),
     lager:debug("Pid:~p~n", [Pid]),
-    Response = 
-    case request_token(Pid, CallbackURL) of
-        TokenData when is_record(TokenData, twitter_token_data) ->
-            json_token(TokenData);
-        Error ->
-            lager:debug("error:~p~n", [Error]),
-            json_error(Error)
-    end,
-    {ok, Response}.
+    request_token(Pid, CallbackURL).
 
            
-%% @doc Get an access token. Returns the JSON for [{token, Token}, {secret,Secret}, {user_id, UserId}, {screen_name, ScreenName}]
+%% @doc Get an access token.
+-spec get_access_token(token(), verifier()) -> #twitter_access_data{} | error().
 get_access_token(Token, Verifier) ->
     lager:debug("Token:~p, Verifier:~p~n", [Token, Verifier]),
-    FinalResponse = case authorize_user(Token, Verifier) of
+    case authorize_user(Token, Verifier) of
         {ok, AccessData} ->
             store_credentials(AccessData),
             % Clobber the gen_fsm, 'cos you don't need it any more
             stop_authorizer(Token),
-            json_access(AccessData);
+            AccessData;
         Error ->
             lager:debug("error:~p~n", [Error]),
-            json_error(Error)
-    end,
-    {ok, FinalResponse}.
+            Error
+    end.
 
-%% @doc Get stored credentials. Returns the JSON for [{token, Token}, {secret,Secret}, {user_id, UserId}, {screen_name, ScreenName}]
+%% @doc Get stored credentials. Returns #access_data{}
+-spec get_credentials(token()) -> #twitter_access_data{} | error().
 get_credentials(Token) ->
     AccessData = 
     case app_cache:get_data(session, Token) of
@@ -96,22 +90,20 @@ get_credentials(Token) ->
         _ ->
             {error, ?INVALID_SESSION}
     end,
-    Response = case is_record(AccessData, twitter_access_data) of
+    case is_record(AccessData, twitter_access_data) of
         true ->
             % update timestamp on session
-            app_cache:set_data(#session{id = Token, value = AccessData}),
-            json_access(AccessData);
+            app_cache:set_data(#session{id = Token, value = AccessData});
         false ->
-            lager:debug("Error:~p~n", [AccessData]),
-            ejson:encode(build_error_response(AccessData))
+            undefined
     end,
-    {ok, Response}.
+    AccessData.
 
-%% @doc Get stored credentials. Returns the JSON for [{token, Token}, {secret,Secret}, {user_id, UserId}, {screen_name, ScreenName}]
+%% @doc Remove stored credentials
+-spec remove_credentials(token()) -> ok.
 remove_credentials(Token) ->
     app_cache:remove_data(session, Token),
-    Response = json_ok(),
-    {ok, Response}.
+    ok.
 
 %% ------------------------------------------------------------------
 %% gen_fsm Function Definitions
@@ -208,43 +200,6 @@ store_credentials(AccessData) ->
     lager:debug("Session:~p~n"< [Session]),
     app_cache:set_data(Session).
 
-
-ok_to_ejson() ->
-    {[{<<"code">>, <<"ok">>}]}.
-
-token_to_ejson(TokenData) ->
-    {[{?TOKEN, TokenData#twitter_token_data.access_token},
-      {?SECRET, TokenData#twitter_token_data.access_token_secret}]}.
-
-access_to_ejson(AccessData) ->
-    {[{?TOKEN, AccessData#twitter_access_data.access_token},
-      {?SECRET, AccessData#twitter_access_data.access_token_secret},
-      {?USER_ID, AccessData#twitter_access_data.user_id},
-      {?SCREEN_NAME, AccessData#twitter_access_data.screen_name}]}.
-
-build_valid_response(Result) ->
-    {[{result, Result},
-      {version, ?API_VERSION}]}.
-
-build_error_response({error, Error}) ->
-    lager:debug("Error:~p~n", [Error]),
-    {[{error, bstr:bstr(Error)},
-      {version, ?API_VERSION}]}.
-
-json_error(Error) ->
-            ejson:encode(build_error_response(Error)).
-
-json_ok() ->
-    Result = ok_to_ejson(),
-    ejson:encode(build_valid_response(Result)).
-
-json_access(AccessData) ->
-            Result = access_to_ejson(AccessData),
-            ejson:encode(build_valid_response(Result)).
-
-json_token(TokenData) ->
-            Result = token_to_ejson(TokenData),
-            ejson:encode(build_valid_response(Result)).
 
 get_credentials_from_session(Session) ->
     Value = Session#session.value,

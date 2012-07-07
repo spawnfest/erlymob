@@ -50,6 +50,10 @@ start() ->
                        {[<<"rsvp">>, '_'], emob_http, []},        %% inform that a user will be attending a mob
                        {[<<"get_loc">>, '_'], emob_http, []},     %% return the currently logged in user's most recent location
                        {[<<"set_loc">>, '_'], emob_http, []},     %% set the currently logged in user's location
+                       {[<<"get_request_token">>], emob_http, []},     %% get a request token for the user to initiate oauth
+                       {[<<"get_access_token">>], emob_http, []},     %% get the oauth access credentials for the user
+                       {[<<"get_credentials">>], emob_http, []},     %% get the oauth access credentials for the user
+                       {[<<"remove_credentials">>], emob_http, []},     %% get the oauth access credentials for the user
                        {'_', default_handler, []}
                       ]}
                ],
