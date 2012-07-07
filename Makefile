@@ -4,7 +4,7 @@ ERL := erl
 EPATH := -pa apps/*/ebin -pz deps/*/ebin
 TEST_EPATH := -pa .eunit -pz deps/*/ebin
 
-.PHONY: all doc clean test
+.PHONY: all compile deps doc clean depclean distclean dialyze test console test-console
 
 all: compile
 
