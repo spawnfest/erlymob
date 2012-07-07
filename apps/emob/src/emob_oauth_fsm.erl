@@ -60,6 +60,7 @@ start_link() ->
 %% @doc Get a request token. Returns the JSON for [{token, Token}, {secret,Secret}]
 get_request_token(CallbackURL) ->
     {ok, Pid} = start_authorizer(),
+    lager:debug("Pid:~p~n", [Pid]),
     Response = 
     case request_token(Pid, CallbackURL) of
         TokenData when is_record(TokenData, twitter_token_data) ->
@@ -73,6 +74,7 @@ get_request_token(CallbackURL) ->
            
 %% @doc Get an access token. Returns the JSON for [{token, Token}, {secret,Secret}, {user_id, UserId}, {screen_name, ScreenName}]
 get_access_token(Token, Verifier) ->
+    lager:debug("Token:~p, Verifier:~p~n", [Token, Verifier]),
     FinalResponse = case authorize_user(Token, Verifier) of
         {ok, AccessData} ->
             store_credentials(AccessData),
@@ -126,7 +128,7 @@ unauthorized({request_token, CallbackURL}, _From, OldState) ->
     case twitterl:get_request_token(CallbackURL) of
         TokenData when is_record(TokenData, twitter_token_data) ->
             Token = TokenData#twitter_token_data.access_token,
-            erlymob_manager:register_process(?OAUTH_FSM, Token),
+            emob_manager:register_process(?OAUTH_FSM, Token),
             TokenData = #twitter_token_data{
                     access_token = TokenData#twitter_token_data.access_token,
                     access_token_secret = TokenData#twitter_token_data.access_token_secret},
@@ -145,7 +147,7 @@ token_requested({authorize, Verifier}, _From, State) ->
     lager:debug("a, Verifier:~p~n, State:~p~n", [Verifier, State]),
     Token = State#state.token,
     Secret = State#state.secret,
-    case twitterl:get_access_token(Token, Secret, Verifier) of
+    case twitterl:get_access_token(Verifier, Token, Secret) of
         AccessData when is_record(AccessData, twitter_access_data) ->
             lager:debug("1:~n~n~n~n~n", []),
             NewState = State#state{access_data = AccessData},
@@ -184,19 +186,19 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %% ------------------------------------------------------------------
 
 start_authorizer() ->
-    erlymob_manager:start_oauth_fsm().
+    emob_manager:start_oauth_fsm().
 
 stop_authorizer(Token) ->
     lager:debug("stop:~p~n", [Token]),
-    erlymob_manager:stop_oauth_fsm(Token).
+    emob_manager:stop_oauth_fsm(Token).
 
 request_token(Pid, CallbackURL) ->
     lager:debug("CallbackURL:~p~n", [CallbackURL]),
-    erlymob_manager:safe_sync_send_event(Pid, {request_token, CallbackURL}).
+    emob_manager:safe_sync_send_event(Pid, {request_token, CallbackURL}).
 
 authorize_user(Token, Verifier) ->
     lager:debug("Token:~p~n, Verifier:~p~n", [Token, Verifier]),
-    erlymob_manager:safe_sync_send_event({?OAUTH_FSM, Token}, {authorize, Verifier}).
+    emob_manager:safe_sync_send_event({?OAUTH_FSM, Token}, {authorize, Verifier}).
 
 store_credentials(AccessData) ->
     lager:debug("AccessData:~p~n", [AccessData]),
@@ -225,6 +227,7 @@ build_valid_response(Result) ->
       {version, ?API_VERSION}]}.
 
 build_error_response({error, Error}) ->
+    lager:debug("Error:~p~n", [Error]),
     {[{error, bstr:bstr(Error)},
       {version, ?API_VERSION}]}.
 
