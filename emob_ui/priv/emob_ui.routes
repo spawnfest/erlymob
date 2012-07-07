@@ -15,6 +15,7 @@
 
 % front page
 {"/", [{controller, "index"}, {action, "home"}]}.
+{"/welcome", [{controller, "index"}, {action, "landing_page"}]}.
 
 % info pages
 {"/about", [{controller, "info"}, {action, "about"}]}.
