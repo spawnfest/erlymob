@@ -19,8 +19,7 @@
                   inets,
                   bstr,
                   cowboy,
-                  gproc,
-                  boss
+                  gproc
                  ]},
   {mod, {emob_app, []}},
   {env, []}
