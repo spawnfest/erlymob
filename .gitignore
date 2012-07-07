@@ -1,4 +1,6 @@
 .DS_Store
 deps/
 ebin/
+log/
 *.dump
+gproc_dist_erlymob@*
