@@ -16,7 +16,7 @@
 -author('Mahesh Paolini-Subramanya <mahesh@dieswaytoofast.com>').
 -author('Tom Heinan <me@tomheinan.com>').
 
--compile({parse_transform,dynarec}).
+-compile([{parse_transform,dynarec}]).
 -compile([{parse_transform, lager_transform}]).
 
 %% ------------------------------------------------------------------
@@ -44,7 +44,8 @@
 
 -define(APP, ?MODULE).
 test() ->
-    get_position(timestamp, test_table_2).
+%    get_position(timestamp, test_table_2).
+1.
 
 -spec tables() -> [#table_info{}].
 tables() ->
