@@ -1,0 +1,37 @@
+{% extends "layout/application.html" %}
+
+{% block title %}The Team &laquo; {% endblock %}
+
+{% block content %}
+
+<div class="row">
+	<div class="span4">
+		<div class="gravatar" style="background-image: url('http://gravatar.com/avatar/204a87f81a0d9764c1f3364f53e8facf?size=370')"></div>
+		<h2>Mahesh Paolini-Subramanya</h2>
+		<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc sit amet tellus nunc, sit amet congue tellus. Quisque vel dolor leo. Morbi blandit justo id eros posuere ut blandit turpis elementum.</p>
+	</div>
+	<div class="span4">
+		<div class="gravatar" style="background-image: url('http://gravatar.com/avatar/27f456e7619d28bda46aa93a704c84fe?size=370')"></div>
+		<h2>Juan Jos&eacute; Comellas</h2>
+		<p>Pellentesque metus mi, ornare a aliquet congue, eleifend at libero. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+	</div>
+	<div class="span4">
+		<div class="gravatar" style="background-image: url('http://gravatar.com/avatar/318fd413a64dccc9c8dcfeeb4de46f6b?size=370')"></div>
+		<h2>Tom Heinan</h2>
+		<p>Phasellus eget iaculis quam. In rhoncus, leo et accumsan placerat, lorem tortor fringilla diam, et accumsan ante lorem et lacus. Pellentesque adipiscing posuere nisi in faucibus.</p>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$('.gravatar').each(function() {
+		$(this).height($(this).width());
+	});
+</script>
+
+<hr>
+
+<footer>
+	<p>Copyright &copy; 2012 Team Erlymob</p>
+</footer>
+
+{% endblock %}
