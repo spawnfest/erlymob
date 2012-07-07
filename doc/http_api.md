@@ -42,7 +42,7 @@ Mob Stuff
 
 *Function*: returns an array of all the upcoming mobs for which a user is eligible.
 
-*Method* GET
+*Method*: GET
 
 *Params*: as above, but sans `id`, and the token is not optional.
 
@@ -58,7 +58,7 @@ Mob Stuff
 *Function*: toggles the `going` tag on a particular mob, which signifies if I’m
             attending this mob or not.
 
-*Method* POST
+*Method*: POST
 
 *Params*:
 
@@ -80,7 +80,7 @@ User Stuff
 
 *Function*: sets the currently logged in user’s location.
 
-*Method* POST
+*Method*: POST
 
 *Params*:
 
@@ -95,7 +95,7 @@ User Stuff
 
 *Function*: gets the currently logged in user’s most recent location.
 
-*Method* GET
+*Method*: GET
 
 *Params*:
 
