@@ -45,7 +45,7 @@
 -define(APP, ?MODULE).
 test() ->
 %    get_position(timestamp, test_table_2).
-    1.
+ 1.
 
 -spec tables() -> [#table_info{}].
 tables() ->

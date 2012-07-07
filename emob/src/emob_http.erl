@@ -90,6 +90,61 @@ handle_put(Path, Req, State) ->
 
 %% @doc Retrieve an entity.
 -spec handle_get(Path :: cowboy_dispatcher:tokens(), http_req(), #state{}) -> {ok, http_req()}.
+handle_get([<<"get_request_token">>], Req, _State) ->
+    %% Here, the callback_url is in the body of the GET request
+    {Args, _Req0} = cowboy_http_req:body_qs(Req),
+    URL = proplists:get_value(?CALLBACK_URL, Args),
+    Response = 
+    case emob_oauth_fsm:get_request_token(URL) of
+        TokenData when is_record(TokenData, twitter_token_data) ->
+            json_token(TokenData);
+        Error ->
+            json_error(Error)
+    end,
+    cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req);
+
+handle_get([<<"get_access_token">>], Req, _State) ->
+    %% Here, the Token and Verifier are in the query string itself
+    {Args, _Req0} = cowboy_http_req:qs_vals(Req),
+    Token = proplists:get_value(?OAUTH_TOKEN, Args),
+    Verifier = proplists:get_value(?OAUTH_VERIFIER, Args),
+    Response = 
+    case emob_oauth_fsm:get_access_token(Token, Verifier) of
+       AccessData when is_record(AccessData, twitter_access_data) ->
+            json_access(AccessData);
+        Error ->
+            lager:debug("error:~p~n", [Error]),
+            json_error(Error)
+    end,
+    cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req);
+
+handle_get([<<"get_credentials">>], Req, _State) ->
+    %% Here, the Token is in the body of the request
+    {Args, _Req0} = cowboy_http_req:body_qs(Req),
+    Token = proplists:get_value(?OAUTH_TOKEN, Args),
+    lager:debug("Token:~p~n", [Token]),
+    Response = 
+    case emob_oauth_fsm:get_credentials(Token) of
+       AccessData when is_record(AccessData, twitter_access_data) ->
+            lager:debug("1:~p~n", [AccessData]),
+            % update timestamp on session
+            app_cache:set_data(#session{id = Token, value = AccessData}),
+            json_access(AccessData);
+        Error ->
+            lager:debug("2:~p~n", [Error]),
+            json_error(Error)
+    end,
+    cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req);
+
+handle_get([<<"remove_credentials">>], Req, _State) ->
+    %% Here, the Token is in the body of the request
+    {Args, _Req0} = cowboy_http_req:body_qs(Req),
+    Token = proplists:get_value(?OAUTH_TOKEN, Args),
+    emob_oauth_fsm:remove_credentials(Token),
+    Response = json_ok(),
+    cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req);
+
+
 handle_get(Path, Req, State) ->
     lager:warning("[~s] Malformed GET request to ~p~n", [State#state.peer, Path]),
     cowboy_http_req:reply(404, Req).   %% not found
@@ -133,3 +188,43 @@ printable_peer(Req) ->
 printable_path(Req) ->
     {Path, _} = cowboy_http_req:raw_path(Req),
     Path.
+
+
+ok_to_ejson() ->
+    {[{<<"code">>, <<"ok">>}]}.
+
+token_to_ejson(TokenData) ->
+    {[{?TOKEN, TokenData#twitter_token_data.access_token},
+      {?SECRET, TokenData#twitter_token_data.access_token_secret}]}.
+
+access_to_ejson(AccessData) ->
+    {[{?TOKEN, AccessData#twitter_access_data.access_token},
+      {?SECRET, AccessData#twitter_access_data.access_token_secret},
+      {?USER_ID, AccessData#twitter_access_data.user_id},
+      {?SCREEN_NAME, AccessData#twitter_access_data.screen_name}]}.
+
+build_valid_response(Result) ->
+    {[{result, Result},
+      {version, ?API_VERSION}]}.
+
+build_error_response({error, Error}) ->
+    lager:debug("Error:~p~n", [Error]),
+    {[{error, bstr:bstr(Error)},
+      {version, ?API_VERSION}]}.
+
+json_error(Error) ->
+            ejson:encode(build_error_response(Error)).
+
+json_ok() ->
+    Result = ok_to_ejson(),
+    ejson:encode(build_valid_response(Result)).
+
+json_access(AccessData) ->
+            Result = access_to_ejson(AccessData),
+            ejson:encode(build_valid_response(Result)).
+
+json_token(TokenData) ->
+            Result = token_to_ejson(TokenData),
+            ejson:encode(build_valid_response(Result)).
+
+

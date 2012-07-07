@@ -87,4 +87,5 @@ get_env(Key, Default) ->
 %%      on this node
 -spec setup() -> ok | emob_error().
 setup() ->
+    app_cache:setup(),
     ok.
