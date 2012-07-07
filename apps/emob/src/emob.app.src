@@ -1,6 +1,6 @@
 {application, emob,
  [
-  {description, ""},
+  {description, "Erlymob"},
   {vsn, "0.1.0"},
   {registered, []},
   {modules, []},
@@ -17,10 +17,10 @@
                   ejson,
                   kvc,
                   inets,
-                  oauth,
                   bstr,
                   cowboy,
-                  gproc
+                  gproc,
+                  boss
                  ]},
   {mod, {emob_app, []}},
   {env, []}
