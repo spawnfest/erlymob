@@ -11,9 +11,10 @@
 -author('Mahesh Paolini-Subramanya <mahesh@dieswaytoofast.com>').
 -author('Tom Heinan <me@tomheinan.com>').
 
+-include("defaults.hrl").
 
+-export([start/0, stop/0, setup/0]).
 -export([get_env/0, get_env/1, get_env/2]).
--export([setup/0]).
 
 -define(APP, ?MODULE).
 

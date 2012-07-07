@@ -22,7 +22,7 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    emob_server_sup:start_link().
+    emob_sup:start_link().
 
 
 stop(_State) ->
