@@ -1,0 +1,27 @@
+{application, emob_app,
+ [
+  {description, ""},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {modules, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  sasl,
+                  lager,
+                  crypto,
+                  public_key,
+                  ssl,
+                  mnesia,
+                  ibrowse,
+                  ejson,
+                  kvc,
+                  inets,
+                  oauth,
+                  bstr,
+                  cowboy,
+                  gproc
+                 ]},
+  {mod, {emob_app, []}},
+  {env, []}
+ ]}.
