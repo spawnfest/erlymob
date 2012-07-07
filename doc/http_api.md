@@ -26,7 +26,7 @@ Mob Stuff
     "id": 12345,
     "tweet": "@erlymob Meet at Joe's in half an hour for free hot dogs!",
     "user": "tomheinan",
-    "created": 1339114400
+    "created": 1339114400,
     "where": {
         "latitude": 45.091778,
         "longitude": -64.361923,
