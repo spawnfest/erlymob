@@ -4,7 +4,7 @@
 before_(_) ->
 	AccessToken = boss_session:get_session_data(SessionID, access_token),
 	if
-		AccessToken == "undefined" ->
+		AccessToken == undefined ->
 			false;
 		true ->
 			true
