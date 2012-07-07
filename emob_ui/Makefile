@@ -1,4 +1,4 @@
-APPLICATION := emob
+APPLICATION := emob_ui
 
 ERL := erl
 EPATH := -pa ebin -pz deps/*/ebin
@@ -33,7 +33,7 @@ test:
 	@rebar skip_deps=true eunit
 
 console:
-	$(ERL) -sname $(APPLICATION) $(EPATH) -config app
+	@./init-dev.sh
 
 test-console: test
 	$(ERL) -sname $(APPLICATION)_test $(TEST_EPATH) -config app
