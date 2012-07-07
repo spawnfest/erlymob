@@ -1,6 +1,10 @@
 body {
-	padding-top: 110px;
 	background: #eee;
+}
+
+.spacer {
+	width: 100%;
+	height: 110px;
 }
 
 .navbar .navbar-inner {
