@@ -81,28 +81,28 @@ terminate(_Req, _State) ->
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
 
-%% @doc Create a user or rune.
+%% @doc Update an entity.
 -spec handle_put(Path :: cowboy_dispatcher:tokens(), http_req(), #state{}) -> {ok, http_req()}.
 handle_put(Path, Req, State) ->
     lager:warning("[~s] Malformed PUT request to ~p~n", [State#state.peer, Path]),
     cowboy_http_req:reply(404, Req).   %% not found
 
 
-%% @doc Retrieve a user or rune.
+%% @doc Retrieve an entity.
 -spec handle_get(Path :: cowboy_dispatcher:tokens(), http_req(), #state{}) -> {ok, http_req()}.
 handle_get(Path, Req, State) ->
     lager:warning("[~s] Malformed GET request to ~p~n", [State#state.peer, Path]),
     cowboy_http_req:reply(404, Req).   %% not found
 
 
-%% @doc Login, logout, update a user or rune.
+%% @doc Create or update en entity.
 -spec handle_post(Path :: cowboy_dispatcher:tokens(), http_req(), #state{}) -> {ok, http_req()}.
 handle_post(Path, Req, State) ->
     lager:warning("[~s] Malformed POST request to ~p~n", [State#state.peer, Path]),
     cowboy_http_req:reply(404, Req).   %% not found
 
 
-%% @doc Delete a user or rune.
+%% @doc Delete an entity.
 -spec handle_delete(Path :: cowboy_dispatcher:tokens(), http_req(), #state{}) -> {ok, http_req()}.
 handle_delete(Path, Req, State) ->
     lager:warning("[~s] Malformed DELETE request to ~p~n", [State#state.peer, Path]),
