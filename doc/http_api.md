@@ -20,7 +20,7 @@ Mob Stuff
     - `id`: the ID of the mob we want to retrieve.
 
 *Returns*:
-    ```javacript
+    ```javascript
     {
         "id": 12345,
         "tweet": "@erlymob Meet at Joe's in half an hour for free hot dogs!",
