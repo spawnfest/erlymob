@@ -9,6 +9,12 @@
 		<h2>User Stuff</h2>
 		<ul class="nav nav-list">
 			<li class="nav-header">
+				This Section Right Here
+			</li>
+			<li>
+				will have box where the user can compose a new event
+			</li>
+			<li class="nav-header">
 				User
 			</li>
 			<li>
@@ -45,8 +51,12 @@
 						'class': "mob"
 					});
 
+					var date = new Date(mob.created);
+
 					var html = '<h3>"'+mob.tweet.replace(/@erlymob_test\s*/, '')+'"</h3>'
-						+'<h6>Posted by <a class="text" href="http://twitter.com/'+mob.user+'" target="_blank">@'+mob.user+'</a></h6>';
+						+'<h4>#mob</h4>'
+						+'<h6>Posted by <a class="text" href="http://twitter.com/'+mob.user+'" target="_blank">@'+mob.user+'</a> '
+						+'on '+date.toUTCString()+'</h6>';
 
 					$('<p>', {
 						html: html
