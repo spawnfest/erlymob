@@ -2,11 +2,11 @@ body {
 	background: #eee;
 }
 
-a:link, a:visited, a:active, a:hover {
+a.text:link, a.text:visited, a.text:active, a.text:hover {
 	color: #d80303;
 }
 
-a:hover {
+a.text:hover {
 	text-decoration: none;
 	border-bottom: 1px dotted #d80303;
 }
