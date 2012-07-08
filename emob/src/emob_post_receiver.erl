@@ -186,7 +186,7 @@ respond_to_post(Tweet) ->
         true ->
             ResponseHash = "@" ++ SScreenName ++ "  erlymobaaaa",
             lager:debug("ResponseHash:~p, Id:~p, Token:~p, Secret:~p~n", [ResponseHash, Id, Token, Secret]),
-            Result = twitterl:statuses_update({debug, foo}, [{"status", ResponseHash}, {"in_reply_to_status_id", Id}], Token, Secret),
+            Result = twitterl:statuses_update({debug, foo}, [{"status", ResponseHash}, {"in_reply_to_status_id", binary_to_list(Id)}], Token, Secret),
             lager:debug("Foo:~p~n", [Result]),
             Result
     end.
