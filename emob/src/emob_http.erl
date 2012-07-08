@@ -293,7 +293,7 @@ post_to_ejson(Post = #post{post_data = Tweet}) ->
       {<<"created">>, Tweet#tweet.created_at},
       {<<"where">>, {[{<<"latitude">>, Lat},
                       {<<"longitude">>, Lon}]}},
-      {<<"when">>, <<>>},
+      {<<"when">>, Tweet#tweet.created_at},
       {<<"rsvps">>, length(Rsvps)},
       {<<"going">>, Going}]}.
 
@@ -335,7 +335,7 @@ convert_post_time(#post{post_data = Tweet} = Post) ->
     Post#post{post_data = NewTweet}.
 
 compare_post(#post{post_data = T1}, #post{post_data = T2}) ->
-    T1#tweet.created_at < T2#tweet.created_at.
+    T1#tweet.created_at > T2#tweet.created_at.
 
 
 %% Tuple containing a date and time.
