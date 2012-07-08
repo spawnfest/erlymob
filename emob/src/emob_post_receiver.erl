@@ -127,6 +127,7 @@ handle_cast({process_post, Tweet}, State) ->
                     id = PostId,
                     post_data = Tweet},
             app_cache:set_data(PostRecord),
+            respond_to_post(Tweet),
             emob_post_distributor:distribute_post(PostId);
         true ->
             ok
@@ -171,3 +172,20 @@ process_tweets(DestPid, Token, Secret) ->
                 %% TODO fill hole between these two requests
                 twitterl:statuses_user_timeline_stream({process, DestPid}, [], Token, Secret) 
         end).
+
+respond_to_post(Tweet) ->
+    Id = Tweet#tweet.id_str,
+    UserId = (Tweet#tweet.user)#twitter_user.id,
+    ScreenName = (Tweet#tweet.user)#twitter_user.screen_name,
+    SScreenName = emob_util:get_string(ScreenName),
+    DefaultUser = twitterl:get_env(default_user_id, <<"undefined">>),
+    Token = twitterl:get_env(oauth_access_token, <<"undefined">>),
+    Secret = twitterl:get_env(oauth_access_token_secret, <<"undefined">>),
+    if UserId =:= DefaultUser ->
+            void;
+        true ->
+            ResponseHash = "@" ++ SScreenName ++ "  erlymobaaaa",
+            lager:debug("ResponseHash:~p, Id:~p, Token:~p, Secret:~p~n", [ResponseHash, Id, Token, Secret]),
+            Foo = twitterl:statuses_update({debug, foo}, [{"status", ResponseHash}, {"in_reply_to_status_id", Id}], Token, Secret),
+            lager:debug("Foo:~p~n", [Foo])
+    end.
