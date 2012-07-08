@@ -10,11 +10,21 @@ emob
 cd emob
 make deps
 make console
+```
+
+*Set Up*:
+
+```text
 emob:setup().
+```
+
+*Deploy":
+
+```text
 emob:start().
 ```
 
-emob-ui
+emob_ui
 ------
 
 *Build*:
@@ -23,5 +33,10 @@ emob-ui
 cd emob_ui
 make deps
 make console
+```
+
+*Deploy":
+
+```text
 ./init-dev.sh
 ```
