@@ -25,7 +25,7 @@ make
 make console
 ```
 
-*Set Up*:
+*Set Up (only needs to be done once per fresh install)*:
 
 ```erlang
 emob:setup().
@@ -59,7 +59,7 @@ Accessing the web interface
 
 To access the web interface with a web browser locally you can go to
 [http://localhost:3000/](http://localhost:3000/) or you can try the public web
-site on [http://www.erlymob.com](http://www.erlymob.com).
+site on [http://erlymob.com](http://erlymob.com).
 
 Posting a new mob
 -----------------
