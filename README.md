@@ -1,6 +1,18 @@
 Erlymob
 =======
 
+[Erlymob](http://www.erlymob.com) is a Twitter-based event aggregator. It
+collects tweets in real time and distributes them to those who have the best
+opportunity to attend. Flash mobs, local deals, activism - everyone can find
+something social.
+
+Erlymob was designed to run with the frontend and backend running in different
+Erlang VMs and so far has only been tested with Ubuntu Linux and Erlang R15B.
+To test it you'll need to start two different Erlang shells on the same
+computer. The two components in the system are named `emob` (backend) and
+`emob_ui` (frontend). The instructions to build, deploy and run the system are
+the following:
+
 emob
 ----
 
@@ -9,24 +21,24 @@ emob
 ```text
 cd emob
 make deps
-make compile
+make
 make console
 ```
 
 *Set Up*:
 
-```text
+```erlang
 emob:setup().
 ```
 
 *Deploy":
 
-```text
+```erlang
 emob:start().
 ```
 
 emob_ui
-------
+-------
 
 *Build*:
 
