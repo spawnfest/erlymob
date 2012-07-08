@@ -83,8 +83,8 @@ body {
 .navbar .btn-navbar:hover {
 	color: #fff;
 	text-shadow: none;
-  background-color: #d80303;
-  *background-color: #d80303;
+	background-color: #d80303;
+	*background-color: #d80303;
 }
 
 .hero-unit {
@@ -103,9 +103,12 @@ body {
 	border-radius: 5px;
 }
 
+.btn {
+	font-weight: bold;
+}
+
 .btn-erlymob {
 	color: #fff;
-	font-weight: bold;
 	text-shadow: none;
 	background-color: #d80303;
 	*background-color: #d80303;
