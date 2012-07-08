@@ -63,11 +63,9 @@ init([Token, Secret]) ->
     process_flag(trap_exit, true),
     emob_manager:register_process(?EMOB_POST_RECEIVER, ?EMOB_POST_RECEIVER),
     DestPid = self(),
-    process_old_tweets(DestPid, Token, Secret),
+    process_tweets(DestPid, Token, Secret),
 
-    %% TODO Fix this so that it only starts after the process is up
-    StreamPid = proc_lib:spawn_link(fun() -> timer:sleep(3000), twitterl:statuses_user_timeline_stream({process, DestPid}, [], Token, Secret) end),
-    State = #post_receiver_state{stream_pid = StreamPid},
+    State = #post_receiver_state{},
     {ok, State}.
 
     
@@ -84,23 +82,19 @@ handle_cast({process_post, Tweet}, State) ->
             PostRecord = #post{
                     id = PostId,
                     post_data = Tweet},
-            lager:debug("PR:~p~n", [PostRecord]),
             app_cache:set_data(PostRecord),
 %            twitterl_post_distributor:distribute_post(PostId);
             ok;
         true ->
-            lager:debug("1:~p~n", []),
             ok
     end,
     {noreply, State};
 
 handle_cast(_Msg, State) ->
-    lager:debug("Huh:~p~n", [_Msg]),
     {noreply, State}.
 
 %% @doc Get the tweet from twitterl
 handle_info(Tweet, State) when is_record(Tweet, tweet) ->
-    lager:debug("Tweet:~p~n~n~n", [Tweet]),
     process_post(Tweet),
     {noreply, State};
 
@@ -109,22 +103,20 @@ handle_info({'EXIT',  _Pid, _Reason}, State) ->
     {noreply, State};
 
 handle_info(_Info, State) ->
-    lager:debug("Message:~p~n~n~n", [_Info]),
     {noreply, State}.
 
 terminate(_Reason, _State) ->
     ok.
 
 code_change(_OldVsn, State, _Extra) ->
-    process_old_tweets(foo, foo, foo),
     {ok, State}.
 
 %% ------------------------------------------------------------------
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
 
--spec process_old_tweets(pid(), token(), secret()) -> ok | pid().
-process_old_tweets(DestPid, Token, Secret) ->
+-spec process_tweets(pid(), token(), secret()) -> ok | pid().
+process_tweets(DestPid, Token, Secret) ->
     SinceId = 
     case app_cache:get_last_data(?POST) of
         [] ->
@@ -133,4 +125,8 @@ process_old_tweets(DestPid, Token, Secret) ->
             Post#post.id
     end,
     SSinceId = emob_util:get_string(SinceId),
-    proc_lib:spawn_link(fun() -> twitterl:statuses_home_timeline({process, DestPid}, [{"since_id", SSinceId}], Token, Secret) end).
+    proc_lib:spawn_link(fun() -> 
+                timer:sleep(?STARTUP_TIMER),
+                twitterl:statuses_home_timeline({process, DestPid}, [{"since_id", SSinceId}], Token, Secret),
+                twitterl:statuses_user_timeline_stream({process, DestPid}, [], Token, Secret) 
+        end).

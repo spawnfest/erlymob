@@ -89,7 +89,12 @@ safe_call({Type, Name}, Request, Timeout) ->
         Pid when is_pid(Pid) ->
             gen_server:call(Pid, Request, Timeout);
         _ ->
-            {error, ?GPROC_UNKNOWN_PROCESS}
+            if Type =:= ?EMOB_USER ->
+                    {ok, Target} = emob_user_sup:start_user(Name),
+                    gen_server:call(Target, Request);
+                true -> 
+                    {error, ?GPROC_UNKNOWN_PROCESS}
+            end
     end;
 
 safe_call(Type, Request, Timeout) ->
@@ -109,7 +114,12 @@ safe_cast({Type, Name}, Request) ->
         Pid when is_pid(Pid) ->
             gen_server:cast(Pid, Request);
         _ ->
-            {error, ?GPROC_UNKNOWN_PROCESS}
+            if Type =:= ?EMOB_USER ->
+                    {ok, Target} = emob_user_sup:start_user(Name),
+                    gen_server:cast(Target, Request);
+                true -> 
+                    {error, ?GPROC_UNKNOWN_PROCESS}
+            end
     end;
 
 safe_cast(Type, Request) ->

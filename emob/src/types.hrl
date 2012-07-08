@@ -33,3 +33,8 @@
 -type twitter_id()                            :: integer().
 -type consumer()                              :: {string(), string(), atom()}.
 
+%% emob
+-type user_id()                               :: binary().
+-type callback_pid()                          :: pid() | atom().
+
+

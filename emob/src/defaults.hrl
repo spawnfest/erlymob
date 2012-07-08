@@ -12,11 +12,15 @@
 %% EMOB DEFINES
 -define(EMOB_POST_RECEIVER, emob_post_receiver).
 -define(EMOB_POST_DISTRIBUTOR, emob_post_distributor).
+-define(EMOB_USER, emob_user).
 -define(LATEST, <<"latest">>).
 -define(INVALID_BOOLEAN, <<"invalid_boolean">>).
 -define(INVALID_BINARY, <<"invalid_binary">>).
 -define(INVALID_STRING, <<"invalid_string">>).
 -define(EMPTY_ERROR, <<"empty_error">>).
+-define(STARTUP_TIMER, 5000).
+-define(MAX_POSTS, 200).
+
 
 %% TWITTERL DEFINES
 -define(CALLBACK_URL, <<"callback_url">>).
@@ -44,6 +48,7 @@
 -define(TEST_TABLE_2_TTL,     160).
 -define(SESSION_TTL,     ?INFINITY).
 -define(POST_TTL,        ?INFINITY).
+-define(USER_TTL,        ?INFINITY).
 
 -define(SCAVENGE_FACTOR, 5*1000).       %% 1000 'cos of microseconds
 
@@ -162,6 +167,15 @@
           location                                  :: any(),
           post_data                                 :: #tweet{},
           processed                                 :: boolean()
+         }).
+
+-define(USER, user).
+-record(user, {
+          id                                        :: twitter_id(),
+          timestamp                                 :: timestamp(),
+          location                                  :: any(),
+          last_post_processed = ?FIRST_POST         :: integer(),
+          callback_pid                              :: callback_pid()
          }).
 
 

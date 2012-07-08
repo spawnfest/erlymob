@@ -92,8 +92,8 @@ code_change(_OldVsn, State, _Extra) ->
 %% ------------------------------------------------------------------
 send_posts_to_users(AllPosts) ->
     % TODO gen_event?
-    lists:foreach(fun(_Post) ->
-                ok
+    lists:foreach(fun(Post) ->
+                emob_user:notify_all_users(Post)
                 end, AllPosts).
 
 
