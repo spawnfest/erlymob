@@ -9,6 +9,7 @@ emob
 ```text
 cd emob
 make deps
+make compile
 make console
 ```
 
@@ -32,10 +33,10 @@ emob_ui
 ```text
 cd emob_ui
 make deps
-make console
+make compile
 ```
 
-*Deploy":
+*Deploy*:
 
 ```text
 ./init-dev.sh
