@@ -194,7 +194,7 @@ store_credentials(AccessData) ->
     app_cache:set_data(User).
 
 get_user_from_token(Token) ->
-    app_cache:get_data_from_index(?USER, Token, ?USER_ACCESS_TOKEN).
+    app_cache:get_data_from_index(?USER, Token, ?USER_ACCESS_TOKEN_POSITION).
 
 get_credentials_from_user(User) ->
     #twitter_access_data{

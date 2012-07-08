@@ -164,6 +164,8 @@
          }).
 
 -define(USER, user).
+%% TODO HACK! Fix get_position in dynarec
+-define(USER_ACCESS_TOKEN_POSITION, 5).
 -record(user, {
           id                                        :: twitter_id(),
           timestamp                                 :: timestamp(),

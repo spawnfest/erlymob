@@ -315,9 +315,9 @@ key_exists(Table, Key) ->
 get_data(Table, Key) ->
     read_data(Table, Key).
 
--spec get_data_from_index(Table::table(), Key::table_key(), IndexField::table_key()) -> any().
-get_data_from_index(Table, Key, IndexField) ->
-    read_data_from_index(Table, Key, IndexField).
+-spec get_data_from_index(Table::table(), Key::table_key(), IndexFieldPosition::table_key_position()) -> any().
+get_data_from_index(Table, Key, IndexFieldPosition) ->
+    read_data_from_index(Table, Key, IndexFieldPosition).
 
 -spec get_last_data(Table::table()) -> any().
 get_last_data(Table) ->
@@ -417,9 +417,8 @@ cache_entry(Table, Key) ->
             undefined
     end.
 
--spec cache_entry_from_index(table(), table_key(), table_key()) -> {last_update() | ?DEFAULT_TIMESTAMP, Data :: any() | 'undefined'}.
-cache_entry_from_index(Table, Key, IndexField) ->
-    IndexPosition = get_position(IndexField, Table),
+-spec cache_entry_from_index(table(), table_key(), table_key_position()) -> {last_update() | ?DEFAULT_TIMESTAMP, Data :: any() | 'undefined'}.
+cache_entry_from_index(Table, Key, IndexPosition) ->
     case mnesia:dirty_index_read(Table, Key, IndexPosition) of
         [Data] ->
             Data;

@@ -13,12 +13,14 @@
 %% app_cache
 -type table()           :: atom().
 -type table_key()       :: any().
+-type table_key_position()    :: non_neg_integer().
 -type table_version()   :: non_neg_integer().
 -type table_type()      :: atom().
 -type timestamp()       :: non_neg_integer().
 -type last_update()     :: timestamp().
 -type time_to_live()    :: non_neg_integer().
 -type index_fields()    :: [table_key()].
+-type index_field_positions()    :: [table_key_position()].
 -type target()          :: twitterl:target().
 
 -type app_field()                       :: atom().
