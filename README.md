@@ -60,3 +60,9 @@ Accessing the web interface
 To access the web interface with a web browser locally you can go to
 [http://localhost:3000/](http://localhost:3000/) or you can try the public web
 site on [http://www.erlymob.com](http://www.erlymob.com).
+
+Posting a new mob
+-----------------
+
+To post a new mob, send a tweet to @erlymob_test containing the text you want
+to post.  It will then be visible on your home screen in Erlymob.
