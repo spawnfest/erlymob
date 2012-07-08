@@ -18,10 +18,10 @@
 
 		<!-- icons -->
 		<link rel="shortcut icon" href="/static/images/icons/favicon.ico">
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/static/images/icons/apple-touch-icon-144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/static/images/icons/apple-touch-icon-114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/static/images/icons/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="/static/images/icons/apple-touch-icon-57-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/static/images/icons/apple-touch-icon-144-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/static/images/icons/apple-touch-icon-114-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/static/images/icons/apple-touch-icon-72-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" href="/static/images/icons/apple-touch-icon-57-precomposed.png">
 
 	</head>
 
@@ -40,7 +40,11 @@
 					<div class="nav-collapse">
 			  
 						<ul class="nav actions">
-							<li><a href="{% url controller="authentication" action="login" %}"><img src="/static/images/buttons/sign-in-with-twitter.png" alt="Sign in with Twitter"></a></li>
+							{% if logged_in %}
+								<li><a href="{% url controller="authentication" action="logout" %}">Log out</a></li>
+							{% else %}
+								<li><a href="{% url controller="authentication" action="login" %}"><img src="/static/images/buttons/sign-in-with-twitter.png" alt="Sign in with Twitter"></a></li>
+							{% endif %}
 						</ul>
 				
 						<ul class="nav">

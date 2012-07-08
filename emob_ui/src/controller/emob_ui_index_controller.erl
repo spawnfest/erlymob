@@ -13,4 +13,4 @@ landing_page('GET', [], false) ->
 home('GET', [], false) ->
 	{redirect, [{controller, "index"}, {action, "landing_page"}]};
 home('GET', [], true) ->
-	{ok, [{session_id, SessionID}]}.
+	{ok, [{logged_in, true}]}.

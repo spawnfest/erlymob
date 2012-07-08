@@ -23,6 +23,8 @@
 
 % auth
 {"/login", [{controller, "authentication"}, {action, "login"}]}.
+{"/post_login", [{controller, "authentication"}, {action, "post_login"}]}.
+{"/logout", [{controller, "authentication"}, {action, "logout"}]}.
 
 % 404 File Not Found handler
 % {404, [{controller, "world"}, {action, "lost"}]}.
