@@ -161,3 +161,17 @@ a.text:hover {
 	background-position: center;
 	background-size: cover;
 }
+
+#mobs .mob {
+	width: 100%;
+	background-color: #fff;
+	-webkit-border-radius: 6px;
+	-moz-border-radius:6px;
+	-ms-border-radius: 6px;
+	-o-border-radius: 6px;
+	border-radius: 6px;
+}
+
+#mobs .mob p {
+	padding: 16px;
+}

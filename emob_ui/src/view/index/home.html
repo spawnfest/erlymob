@@ -30,6 +30,32 @@
 	</div>
 	<div class="span9">
 		<h2>Mobs</h2>
+
+		<div id="mobs"></div>
+
+		<script> /* {# this is a terrible hack, but i've only got 2hrs left, so f*ck it, we're doin' it live #} */
+			var mobs = {{ mobs_json }};
+
+			$.each(mobs, function() {
+				var mob = this;
+				
+				if (mob.user != "erlymob_test" && mob.user != null) {
+						var div = $('<div>', {
+						id: mob.id,
+						'class': "mob"
+					});
+
+					var html = '<h3>'+mob.tweet+'</h3>'
+						+'<h6>Posted by @'+mob.user+'</h6>';
+
+					$('<p>', {
+						html: html
+					}).appendTo(div);
+
+					div.appendTo($('#mobs'));
+				}
+			});
+		</script>
 	</div>
 </div>
 

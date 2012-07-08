@@ -1,5 +1,5 @@
 -module(emob_transport).
--export([get_request_token/0, get_access_token/2]).
+-export([get_request_token/0, get_access_token/2, get_mobs/1]).
 
 get_request_token() ->
 	{ok, ApiUrl} = application:get_env(emob_ui, api_root),
@@ -34,6 +34,28 @@ get_access_token(OAuthToken, OAuthVerifier) ->
 				case Code of
 					"2" ++ _Tail ->
 						ejson:decode(Body);
+					_  ->
+						{error, Code}
+				end
+			catch
+				throw:Reason ->
+					{error, Reason}
+			end;
+
+		{error, _Reason} = Error ->
+			Error
+	end.
+
+get_mobs(AccessToken) ->
+	{access_token, Token} = AccessToken,
+	{ok, ApiUrl} = application:get_env(emob_ui, api_root),
+	TargetUrl = lists:flatten(io_lib:format("~s/mobs?token=~s", [ApiUrl, Token])),
+	case ibrowse:send_req(TargetUrl, [{"Accept", "application/json"}], get, [], [{response_format, binary}]) of
+		{ok, Code, Headers, Body} ->
+			try
+				case Code of
+					"2" ++ _Tail ->
+						Body;
 					_  ->
 						{error, Code}
 				end
