@@ -14,8 +14,8 @@
 % Note that routing across applications results in a 302 redirect.
 
 % front page
-{"/", [{controller, "index"}, {action, "home"}]}.
-{"/welcome", [{controller, "index"}, {action, "landing_page"}]}.
+{"/home", [{controller, "index"}, {action, "home"}]}.
+{"/", [{controller, "index"}, {action, "landing_page"}]}.
 
 % info pages
 {"/about", [{controller, "info"}, {action, "about"}]}.
