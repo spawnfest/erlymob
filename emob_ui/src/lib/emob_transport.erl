@@ -27,7 +27,7 @@ get_request_token() ->
 
 get_access_token(OAuthToken, OAuthVerifier) ->
 	{ok, ApiUrl} = application:get_env(emob_ui, api_root),
-	TargetUrl = io_lib:format("~s/get_access_token?oauth_token=~s&oauth_verifier=~s", [ApiUrl, OAuthToken, OAuthVerifier]),
+	TargetUrl = lists:flatten(io_lib:format("~s/get_access_token?oauth_token=~s&oauth_verifier=~s", [ApiUrl, OAuthToken, OAuthVerifier])),
 	case ibrowse:send_req(TargetUrl, [{"Accept", "application/json"}], get, [], [{response_format, binary}]) of
 		{ok, Code, Headers, Body} ->
 			try
