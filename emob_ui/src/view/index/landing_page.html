@@ -3,10 +3,10 @@
 {% block content %}
 
 <div class="hero-unit">
-	<div style="width: 100%; height: 128px;"></div>
+	<div style="width: 100%; height: 128px;" class="hidden-phone"></div>
 	<p>
 		<strong>Erlymob: Crowdsource the Crowd.</strong><br>
-		Welcome to Erlymob, a Twitter-based event aggregator.  It collects tweets in real time and distributes them to those who have the best opportunity to attend. Flash mobs, local deals, activism - everyone can find something social.<br><br>
+		<span class="hidden-phone">Welcome to Erlymob, a Twitter-based event aggregator.  It collects tweets in real time and distributes them to those who have the best opportunity to attend. Flash mobs, local deals, activism - everyone can find something social.<br></span><br>
 		<a class="btn btn-primary btn-large" href="{% url controller="info" action="about" %}">Learn more &raquo;</a>
 	</p>
 </div>
