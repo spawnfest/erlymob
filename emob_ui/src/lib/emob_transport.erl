@@ -3,9 +3,10 @@
 
 get_request_token() ->
 	{ok, ApiUrl} = application:get_env(emob_ui, api_root),
-	TargetUrl = io_lib:format("~s/get_request_token", [ApiUrl]),
+	TargetUrl = lists:flatten(io_lib:format("~s/get_request_token", [ApiUrl])),
 	{ok, CBUrl} = application:get_env(emob_ui, local_root),
-	GetData = io_lib:format("callback_url=~s/post_login", [CBUrl]),
+	GetData = lists:flatten(io_lib:format("callback_url=~s/post_login", [CBUrl])),
+	io:format("TargetUrl: ~p; GetData: ~p~n", [TargetUrl, GetData]),
 	case ibrowse:send_req(TargetUrl, [{"Accept", "application/json"}], get, [GetData], [{response_format, binary}]) of
 		{ok, Code, Headers, Body} ->
 			try
