@@ -85,11 +85,58 @@ terminate(_Req, _State) ->
 -spec handle_put(Path :: cowboy_dispatcher:tokens(), http_req(), #state{}) -> {ok, http_req()}.
 handle_put(Path, Req, State) ->
     lager:warning("[~s] Malformed PUT request to ~p~n", [State#state.peer, Path]),
-    cowboy_http_req:reply(404, Req).   %% not found
+    cowboy_http_req:reply(400, Req).   %% bad request
 
 
 %% @doc Retrieve an entity.
 -spec handle_get(Path :: cowboy_dispatcher:tokens(), http_req(), #state{}) -> {ok, http_req()}.
+handle_get([<<"mobs">>], Req0, _State) ->
+    {Args, Req} = cowboy_http_req:body_qs(Req0),
+    Posts = case proplists:get_value(?TOKEN, Args) of
+                %% /mobs
+                undefined ->
+                    emob_post_receiver:get_all_posts();
+                %% /mobs?token=:token
+                Token ->
+                    emob_user:get_posts(Token)
+            end,
+    Response = json_posts(Posts),
+    cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req);
+
+handle_get([<<"mob">>], Req0, _State) ->
+    {Args, Req} = cowboy_http_req:body_qs(Req0),
+    case proplists:get_value(?ID, Args) of
+        undefined ->
+            cowboy_http_req:reply(400, Req);   %% bad request
+        PostId ->
+            %% /mob?id=:id
+            case emob_post_receiver:get_post(PostId) of
+                [] ->
+                    cowboy_http_req:reply(404, Req);   %% not found
+                [Post] ->
+                    Response = json_post(Post),
+                    cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req)
+            end
+    end;
+
+handle_get([<<"rsvp">>], Req0, _State) ->
+    {Args, Req} = cowboy_http_req:body_qs(Req0),
+    case proplists:get_value(?ID, Args) of
+        undefined ->
+            cowboy_http_req:reply(400, Req);   %% bad request
+        PostId ->
+            %% /rsvp?id=:id&token=:token
+            case proplists:get_value(?TOKEN, Args) of
+                undefined ->
+                    cowboy_http_req:reply(400, Req);   %% bad request
+                Token ->
+                    emob_user:rsvp_post(Token, PostId),
+
+                    Response = ejson:decode({[{<<"going">>, true}]}),
+                    cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req)
+            end
+    end;
+
 handle_get([<<"get_request_token">>], Req, _State) ->
     %% Here, the callback_url is in the body of the GET request
     {Args, _Req0} = cowboy_http_req:body_qs(Req),
@@ -155,7 +202,7 @@ handle_post(Path, Req, State) ->
 -spec handle_delete(Path :: cowboy_dispatcher:tokens(), http_req(), #state{}) -> {ok, http_req()}.
 handle_delete(Path, Req, State) ->
     lager:warning("[~s] Malformed DELETE request to ~p~n", [State#state.peer, Path]),
-    cowboy_http_req:reply(404, Req).   %% not found
+    cowboy_http_req:reply(400, Req).   %% bad request
 
 
 % -spec ejson_to_proplist({[{Name :: binary(), Value :: binary()}]}) -> proplists:proplist().
@@ -197,6 +244,20 @@ access_to_ejson(AccessData) ->
       {?USER_ID, AccessData#twitter_access_data.user_id},
       {?SCREEN_NAME, AccessData#twitter_access_data.screen_name}]}.
 
+post_to_ejson(Post = #post{post_data = Tweet}) ->
+    User = Tweet#tweet.user,
+    Rsvps = emob_post_receiver:get_rsvps(Post#post.id),
+    {[{<<"id">>,      Post#post.id},
+      {<<"tweet">>,   Tweet#tweet.text},
+      {<<"user">>,    User#twitter_user.screen_name},
+      {<<"created">>, Tweet#tweet.created_at},
+      {<<"where">>, {[{<<"latitude">>, <<>>},
+                      {<<"longitude">>, <<>>}]}},
+      {<<"when">>, <<>>},
+      {<<"rsvps">>, lists:length(Rsvps)},
+      {<<"going">>, lists:member(User#twitter_user.id_str, Rsvps)}]}.
+
+
 build_valid_response(Result) ->
     {[{result, Result},
       {version, ?API_VERSION}]}.
@@ -220,4 +281,8 @@ json_token(TokenData) ->
     Result = token_to_ejson(TokenData),
     ejson:encode(build_valid_response(Result)).
 
+json_post(Post) ->
+    ejson:encode(post_to_ejson(Post)).
 
+json_posts(Posts) ->
+    ejson:encode([post_to_ejson(Post) || Post <- Posts]).
