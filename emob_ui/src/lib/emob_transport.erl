@@ -3,8 +3,8 @@
 
 get_request_token(CallbackUrl) ->
 	{_, Url} = CallbackUrl,
-	Body = "callback_url=" ++ Url,
-	case ibrowse:send_req("http://localhost:8080/get_request_token", [{"Accept", "application/json"}], get, [Body], [{response_format, binary}]) of
+	GetData = "callback_url=" ++ Url,
+	case ibrowse:send_req("http://localhost:8080/get_request_token", [{"Accept", "application/json"}], get, [GetData], [{response_format, binary}]) of
 		{ok, Code, Headers, Body} ->
 			try
 				case Code of
