@@ -91,8 +91,8 @@ handle_put(Path, Req, State) ->
 %% @doc Retrieve an entity.
 -spec handle_get(Path :: cowboy_dispatcher:tokens(), http_req(), #state{}) -> {ok, http_req()}.
 handle_get([<<"mobs">>], Req0, _State) ->
-    {Args, Req} = cowboy_http_req:body_qs(Req0),
-    Posts = case proplists:get_value(?TOKEN, Args) of
+    {Value, Req} = cowboy_http_req:qs_val(Req0, ?TOKEN),
+    Posts = case Value of
                 %% /mobs
                 undefined ->
                     emob_post_receiver:get_all_posts();
@@ -105,32 +105,34 @@ handle_get([<<"mobs">>], Req0, _State) ->
     cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req);
 
 handle_get([<<"mob">>], Req0, _State) ->
-    {Args, Req} = cowboy_http_req:body_qs(Req0),
-    case proplists:get_value(?ID, Args) of
+    {Value, Req} = cowboy_http_req:qs_val(?ID, Req0),
+    case Value of
         undefined ->
+            lager:info("Missing 'id' in /mob request; qs=~p~n", [Req]),
             cowboy_http_req:reply(400, Req);   %% bad request
         PostId ->
             %% /mob?id=:id
-            case emob_post_receiver:get_post(PostId) of
-                [] ->
-                    cowboy_http_req:reply(404, Req);   %% not found
-                [Post] ->
+            case emob_post_receiver:get_post(bstr:to_integer(PostId)) of
+                #post{} = Post ->
                     Response = json_post(Post),
-                    cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req)
+                    cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req);
+                _ ->
+                    lager:info("Could not find post with id=~p~n", [PostId]),
+                    cowboy_http_req:reply(404, Req)    %% not found
             end
     end;
 
 handle_get([<<"rsvp">>], Req0, _State) ->
-    {Args, Req} = cowboy_http_req:body_qs(Req0),
-    case proplists:get_value(?ID, Args) of
+    {Value, Req1} = cowboy_http_req:qs_val(?ID, Req0),
+    case Value of
         undefined ->
-            cowboy_http_req:reply(400, Req);   %% bad request
+            cowboy_http_req:reply(400, Req1);   %% bad request
         PostId ->
             %% /rsvp?id=:id&token=:token
-            case proplists:get_value(?TOKEN, Args) of
-                undefined ->
+            case cowboy_http_req:qs_val(?TOKEN, Req1) of
+                {undefined, Req} ->
                     cowboy_http_req:reply(400, Req);   %% bad request
-                Token ->
+                {Token, Req} ->
                     emob_user:rsvp_post(Token, PostId),
 
                     Response = ejson:encode({[{<<"going">>, true}]}),
@@ -139,8 +141,8 @@ handle_get([<<"rsvp">>], Req0, _State) ->
     end;
 
 handle_get([<<"get_loc">>], Req0, _State) ->
-    {Args, Req} = cowboy_http_req:body_qs(Req0),
-    case proplists:get_value(?TOKEN, Args) of
+    {Value1, Req} = cowboy_http_req:qs_val(?TOKEN, Req0),
+    case Value1 of
         undefined ->
             cowboy_http_req:reply(400, Req);   %% bad request
         %% /get_loc?token=:token
