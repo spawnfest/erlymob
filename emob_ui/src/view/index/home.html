@@ -51,7 +51,7 @@
 						'class': "mob"
 					});
 
-					var date = new Date(mob.created);
+					var date = new Date((mob.created) * 1000);
 
 					var html = '<h3>"'+mob.tweet.replace(/@erlymob_test\s*/, '')+'"</h3>'
 						+'<h4><a class="text" href="https://twitter.com/#!/search/%23mob'+mob.id+'" target="_blank">#mob'+mob.id+'</a></h4>'
