@@ -99,7 +99,8 @@ handle_get([<<"mobs">>], Req0, _State) ->
                     emob_post_receiver:get_all_posts();
                 %% /mobs?token=:token
                 Token ->
-                    emob_user:get_posts(Token)
+                    {ok, Values} = emob_user:get_posts(Token),
+                    Values
             end,
     %% lager:debug("Found the foillowing posts:~n~p~n", [Posts]),
     Response = json_posts(Posts),
