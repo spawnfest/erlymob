@@ -45,8 +45,8 @@
 						'class': "mob"
 					});
 
-					var html = '<h3>'+mob.tweet+'</h3>'
-						+'<h6>Posted by @'+mob.user+'</h6>';
+					var html = '<h3>"'+mob.tweet.replace(/@erlymob_test\s*/, '')+'"</h3>'
+						+'<h6>Posted by <a class="text" href="http://twitter.com/'+mob.user+'" target="_blank">@'+mob.user+'</a></h6>';
 
 					$('<p>', {
 						html: html
