@@ -42,4 +42,5 @@ start_link() ->
 init([]) ->
     Receiver = ?SUPERVISOR(make_ref(), supervisor, emob_post_receiver_sup, []),
     Distributor = ?SUPERVISOR(make_ref(), supervisor, emob_post_distributor_sup, []),
-    {ok, { {one_for_one, 5, 300}, [Receiver,Distributor]}}.
+    User = ?SUPERVISOR(make_ref(), supervisor, emob_user_sup, []),
+    {ok, { {one_for_one, 5, 300}, [Receiver, Distributor, User]}}.

@@ -18,12 +18,16 @@
 -type timestamp()       :: non_neg_integer().
 -type last_update()     :: timestamp().
 -type time_to_live()    :: non_neg_integer().
+-type index_fields()    :: [table_key()].
 
 -type app_field()                       :: atom().
 
 %% Twitter
 -type token()                                 :: binary().
 -type secret()                                :: binary().
+-type screen_name()                           :: binary().
+-type profile_picture()                       :: binary().
+-type user_id()                               :: binary().
 -type status()                                :: binary().
 -type verifier()                              :: binary().
 -type url()                                   :: binary().
@@ -34,7 +38,6 @@
 -type consumer()                              :: {string(), string(), atom()}.
 
 %% emob
--type user_id()                               :: binary().
 -type callback_pid()                          :: pid() | atom().
 -type post_id()                               :: integer().
 -type post_processed_status()                 :: boolean().

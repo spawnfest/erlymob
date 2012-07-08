@@ -113,7 +113,6 @@ handle_get([<<"get_access_token">>], Req, _State) ->
        AccessData when is_record(AccessData, twitter_access_data) ->
             json_access(AccessData);
         Error ->
-            lager:debug("error:~p~n", [Error]),
             json_error(Error)
     end,
     cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req);
@@ -122,16 +121,11 @@ handle_get([<<"get_credentials">>], Req, _State) ->
     %% Here, the Token is in the body of the request
     {Args, _Req0} = cowboy_http_req:body_qs(Req),
     Token = proplists:get_value(?OAUTH_TOKEN, Args),
-    lager:debug("Token:~p~n", [Token]),
     Response =
     case emob_oauth_fsm:get_credentials(Token) of
        AccessData when is_record(AccessData, twitter_access_data) ->
-            lager:debug("1:~p~n", [AccessData]),
-            % update timestamp on session
-            app_cache:set_data(#session{id = Token, value = AccessData}),
             json_access(AccessData);
         Error ->
-            lager:debug("2:~p~n", [Error]),
             json_error(Error)
     end,
     cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req);
@@ -208,7 +202,6 @@ build_valid_response(Result) ->
       {version, ?API_VERSION}]}.
 
 build_error_response({error, Error}) ->
-    lager:debug("Error:~p~n", [Error]),
     {[{error, bstr:bstr(Error)},
       {version, ?API_VERSION}]}.
 

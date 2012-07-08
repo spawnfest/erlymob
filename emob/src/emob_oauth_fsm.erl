@@ -83,26 +83,17 @@ get_access_token(Token, Verifier) ->
 %% @doc Get stored credentials. Returns #access_data{}
 -spec get_credentials(token()) -> #twitter_access_data{} | error().
 get_credentials(Token) ->
-    AccessData = 
-    case app_cache:get_data(session, Token) of
-        [Session] when is_record(Session, session) ->
-            get_credentials_from_session(Session);
+    case get_user_from_token(Token) of
+        [User] when is_record(User, ?USER) ->
+            get_credentials_from_user(User);
         _ ->
-            {error, ?INVALID_SESSION}
-    end,
-    case is_record(AccessData, twitter_access_data) of
-        true ->
-            % update timestamp on session
-            app_cache:set_data(#session{id = Token, value = AccessData});
-        false ->
-            undefined
-    end,
-    AccessData.
+            {error, ?INVALID_USER}
+    end.
 
 %% @doc Remove stored credentials
 -spec remove_credentials(token()) -> ok.
 remove_credentials(Token) ->
-    app_cache:remove_data(session, Token),
+    app_cache:remove_data(?USER, Token),
     ok.
 
 %% ------------------------------------------------------------------
@@ -194,19 +185,21 @@ authorize_user(Token, Verifier) ->
 
 store_credentials(AccessData) ->
     lager:debug("AccessData:~p~n", [AccessData]),
-    Id =  AccessData#twitter_access_data.access_token,
-    Session = #session{id = Id,
-                       value = AccessData},
-    lager:debug("Session:~p~n"< [Session]),
-    app_cache:set_data(Session).
+    User = #user{id = AccessData#twitter_access_data.user_id,
+                 access_token = AccessData#twitter_access_data.access_token,
+                 access_token_secret = AccessData#twitter_access_data.access_token_secret,
+                 screen_name = AccessData#twitter_access_data.screen_name,
+                 user_id = AccessData#twitter_access_data.user_id},
+    lager:debug("User:~p~n", [User]),
+    app_cache:set_data(User).
 
+get_user_from_token(Token) ->
+    app_cache:get_data_from_index(?USER, Token, ?USER_ACCESS_TOKEN).
 
-get_credentials_from_session(Session) ->
-    Value = Session#session.value,
-    case is_record(Value, twitter_access_data) of
-        true ->
-            Value;
-        false ->
-            {errror, ?INVALID_SESSION}
-    end.
+get_credentials_from_user(User) ->
+    #twitter_access_data{
+        access_token = User#user.access_token,
+        access_token_secret = User#user.access_token_secret,
+        screen_name = User#user.screen_name,
+        user_id = User#user.user_id}.
 

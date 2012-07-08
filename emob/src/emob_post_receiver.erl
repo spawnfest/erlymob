@@ -27,6 +27,8 @@
 -export([process_post/1]).
 
 % Testing
+-export([get_post/1]).
+-export([get_all_posts/0]).
 -export([empty_posts/0]).
 
 %% ------------------------------------------------------------------
@@ -55,6 +57,20 @@
 -spec process_post(#post{}) -> ok.
 process_post(Post) ->
     emob_manager:safe_cast({?EMOB_POST_RECEIVER, ?EMOB_POST_RECEIVER}, {process_post, Post}).
+
+-spec get_post(post_id()) -> #post{} | undefined | error().
+get_post(PostId) ->
+    case app_cache:get_data(?POST, PostId) of
+        [Post] ->
+            Post;
+        _ ->
+            undefined
+    end.
+
+
+-spec get_all_posts() -> [#post{}] | error().
+get_all_posts() ->
+    app_cache:get_after(?POST, ?FIRST_POST).
 
 -spec empty_posts() -> {atomic, ok} | error().
 empty_posts() ->

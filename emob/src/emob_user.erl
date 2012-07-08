@@ -24,6 +24,7 @@
 %% API Function Exports
 %% ------------------------------------------------------------------
 
+-export([get_user/1]).
 -export([get_posts/1]).
 -export([process_post/2]).
 -export([notify_all_users/1]).
@@ -51,6 +52,10 @@
 %% @doc Retrieve the latest posts from the user
 get_posts(UserId) ->
     emob_manager:safe_call({?EMOB_USER, UserId}, {get_posts}).
+
+%% @doc Get the User profile
+get_user(UserId) ->
+    emob_manager:safe_call({?EMOB_USER, UserId}, {get_user}).
 
 %% @doc Process the incoming tweet
 %%          sent to Target
@@ -82,16 +87,27 @@ init([UserId]) ->
 
 handle_call({get_posts}, _From, State) ->
     UserId = State#state.user_id,
-    User = get_user(UserId),
+    User = get_user_data(UserId),
     Posts = update_posts_from_cache(User),
     {reply, {ok, Posts}, State};
+
+handle_call({get_user}, _From, State) ->
+    UserId = State#state.user_id,
+    User = get_user_data(UserId),
+    Response = 
+    if User#user.id  =:= UserId ->
+            {ok, User};
+        true ->
+            {error, ?INVALID_USER}
+    end,
+    {reply, Response, State};
 
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
 handle_cast({process_post, PostId}, State) ->
     UserId = State#state.user_id,
-    User = get_user(UserId),
+    User = get_user_data(UserId),
     notify_user(User, PostId),
     {noreply, State};
 
@@ -111,8 +127,8 @@ code_change(_OldVsn, State, _Extra) ->
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
 
--spec get_user(user_id()) -> #user{}.
-get_user(UserId) ->
+-spec get_user_data(user_id()) -> #user{}.
+get_user_data(UserId) ->
     case app_cache:get_data(?USER, UserId) of
         [User] ->
             User;
@@ -122,14 +138,13 @@ get_user(UserId) ->
 
 -spec update_posts_from_cache(#user{}) -> list().
 update_posts_from_cache(User) ->
-    case app_cache:get_after(User#user.last_post_processed) of
-        [_H|_Tail] ->
-            AllPosts = app_cache:get_after(User#user.last_post_processed),
+    case app_cache:get_after(?POST, User#user.last_post_processed) of
+        [_H|_Tail] = AllPosts ->
             SortedPosts = lists:sort(fun(A,B) -> A#post.id >= B#post.id end, AllPosts),
             LimitedPosts = lists:sublist(SortedPosts, ?MAX_POSTS),
             case LimitedPosts of
                 [LastPost|_] ->
-                    app_cache:set_data(?USER, User#user{last_post_processed = LastPost#post.id});
+                    app_cache:set_data(User#user{last_post_processed = LastPost#post.id});
                 [] ->
                     void
             end,

@@ -34,7 +34,7 @@
         ]).
 
 %% Public APIs
--export([key_exists/2, get_data/2, get_last_data/1, get_after/2, set_data/1, remove_data/2]).
+-export([key_exists/2, get_data_from_index/3, get_data/2, get_last_data/1, get_after/2, set_data/1, remove_data/2]).
 -export([test/0]).
 
 %% ------------------------------------------------------------------
@@ -52,9 +52,8 @@ tables() ->
     [
      #table_info{table = ?TEST_TABLE_1,              version = 1, time_to_live = ?TEST_TABLE_1_TTL, type = ordered_set},
      #table_info{table = ?TEST_TABLE_2,              version = 1, time_to_live = ?TEST_TABLE_2_TTL, type = set},
-     #table_info{table = ?SESSION,                   version = 1, time_to_live = ?SESSION_TTL,          type = set},
      #table_info{table = ?POST,                      version = 1, time_to_live = ?POST_TTL, type = ordered_set},
-     #table_info{table = ?USER,                      version = 1, time_to_live = ?USER_TTL, type = set}
+     #table_info{table = ?USER,                      version = 1, time_to_live = ?USER_TTL, type = set, secondary_index_fields = [access_token]}
     ].
 
 
@@ -147,9 +146,9 @@ init() ->
 init(Nodes) ->
     try
         init_metatable(Nodes),
-        lists:foreach(fun (#table_info{table = Table, version = Version, time_to_live = TimeToLive, type = Type}) ->
+        lists:foreach(fun (#table_info{table = Table, version = Version, time_to_live = TimeToLive, type = Type, secondary_index_fields = IndexFields}) ->
 
-                          init_table(Table, Version, TimeToLive, Type, Nodes)
+                          init_table(Table, Version, TimeToLive, Type, IndexFields, Nodes)
                   end, tables())
     catch
         _:Error ->
@@ -175,11 +174,11 @@ init_metatable(Nodes) ->
 
 -spec init_table(table(), [node()]) -> ok | {aborted, Reason :: any()}.
 init_table(Table, Nodes) ->
-    {Version, TimeToLive, Type} = table_info(Table),
-    init_table(Table, Version, TimeToLive, Type, Nodes).
+    {Version, TimeToLive, Type, IndexFields} = table_info(Table),
+    init_table(Table, Version, TimeToLive, Type, IndexFields, Nodes).
 
--spec init_table(table(), table_version(), time_to_live(), table_type(), [node()]) -> ok | {aborted, Reason :: any()}.
-init_table(Table, Version, TimeToLive, Type, Nodes) ->
+-spec init_table(table(), table_version(), time_to_live(), table_type(), index_fields(), [node()]) -> ok | {aborted, Reason :: any()}.
+init_table(Table, Version, TimeToLive, Type, IndexFields, Nodes) ->
     Fields = fields(Table),
     OldVersion = case mnesia:dirty_read(?METATABLE, Table) of
                      [#app_metatable{version = Number}] ->
@@ -197,15 +196,15 @@ init_table(Table, Version, TimeToLive, Type, Nodes) ->
             upgrade_table(Table, OldVersion, Version, Fields)
     catch
         _ : _ ->
-            create_table(Table, Version, TimeToLive, Type, Nodes)
+            create_table(Table, Version, TimeToLive, Type, IndexFields, Nodes)
     end.
 
 
 -spec create_tables([node()]) -> ok | {aborted, Reason :: any()}.
 create_tables(Nodes) ->
     create_metatable(Nodes),
-    lists:foreach(fun (#table_info{table = Table, version = Version, time_to_live = TimeToLive, type = Type}) ->
-                          create_table(Table, Version, TimeToLive, Type, Nodes)
+    lists:foreach(fun (#table_info{table = Table, version = Version, time_to_live = TimeToLive, type = Type, secondary_index_fields = IndexFields}) ->
+                          create_table(Table, Version, TimeToLive, Type, IndexFields, Nodes)
                   end, tables()).
 
 
@@ -224,18 +223,22 @@ create_metatable(Nodes) ->
 
 -spec create_table(table(), [node()]) -> ok | {aborted, Reason :: any()}.
 create_table(Table, Nodes) ->
-    {Version, TimeToLive, Type} = table_info(Table),
-    create_table(Table, Version, TimeToLive, Type, Nodes).
+    {Version, TimeToLive, Type, IndexFields} = table_info(Table),
+    create_table(Table, Version, TimeToLive, Type, IndexFields, Nodes).
 
--spec create_table(table(), table_version(), time_to_live(), table_type(), [node()]) -> ok | {aborted, Reason :: any()}.
-create_table(Table, Version, TimeToLive, Type, Nodes) ->
+-spec create_table(table(), table_version(), time_to_live(), table_type(), index_fields(), [node()]) -> ok | {aborted, Reason :: any()}.
+create_table(Table, Version, TimeToLive, Type, IndexFields, Nodes) ->
     {atomic, ok} = mnesia:create_table(Table, [{access_mode, read_write},
                                                {record_name, Table},
                                                {attributes, fields(Table)},
                                                {disc_copies, Nodes},
                                                {type, Type},
                                                {local_content, true}]),
-    {atomic, ok} = mnesia:add_table_index(Table, ?TIMESTAMP),
+    % Add secondary indexes
+    lists:map(fun(Field) ->
+                {atomic, ok} = mnesia:add_table_index(Table, Field)
+        end, [?TIMESTAMP | IndexFields]),
+
     WriteFun = fun() -> 
             mnesia:write(#app_metatable{
                         table = Table,
@@ -273,8 +276,8 @@ upgrade_table(Table, _OldVersion, _NewVersion, Fields) ->
 -spec table_info(table()) -> {table_version(), time_to_live(), table_type()} | undefined.
 table_info(Table) ->
     case lists:keyfind(Table, #table_info.table, tables()) of
-        #table_info{version = Version, time_to_live = TimeToLive, type = Type} ->
-            {Version, TimeToLive, Type};
+        #table_info{version = Version, time_to_live = TimeToLive, type = Type, secondary_index_fields = IndexFields} ->
+            {Version, TimeToLive, Type, IndexFields};
         false ->
             undefined
     end.
@@ -312,6 +315,10 @@ key_exists(Table, Key) ->
 get_data(Table, Key) ->
     read_data(Table, Key).
 
+-spec get_data_from_index(Table::table(), Key::table_key(), IndexField::table_key()) -> any().
+get_data_from_index(Table, Key, IndexField) ->
+    read_data_from_index(Table, Key, IndexField).
+
 -spec get_last_data(Table::table()) -> any().
 get_last_data(Table) ->
     read_last_data(Table).
@@ -347,6 +354,12 @@ check_key_exists(Table, Key) ->
 read_data(Table, Key) ->
     TableTTL = cache_time_to_live(Table),
     CachedData = cache_entry(Table, Key),
+    filter_data_by_ttl(TableTTL, CachedData).
+
+-spec read_data_from_index(table(), table_key(), table_key()) -> list().
+read_data_from_index(Table, Key, IndexField) ->
+    TableTTL = cache_time_to_live(Table),
+    CachedData = cache_entry_from_index(Table, Key, IndexField),
     filter_data_by_ttl(TableTTL, CachedData).
 
 -spec read_last_data(table()) -> list().
@@ -398,6 +411,16 @@ delete_data(Table, Key) ->
 -spec cache_entry(table(), table_key()) -> {last_update() | ?DEFAULT_TIMESTAMP, Data :: any() | 'undefined'}.
 cache_entry(Table, Key) ->
     case mnesia:dirty_read(Table, Key) of
+        [Data] ->
+            Data;
+        [] ->
+            undefined
+    end.
+
+-spec cache_entry_from_index(table(), table_key(), table_key()) -> {last_update() | ?DEFAULT_TIMESTAMP, Data :: any() | 'undefined'}.
+cache_entry_from_index(Table, Key, IndexField) ->
+    IndexPosition = get_position(IndexField, Table),
+    case mnesia:dirty_index_read(Table, Key, IndexPosition) of
         [Data] ->
             Data;
         [] ->

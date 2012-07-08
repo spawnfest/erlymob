@@ -20,6 +20,8 @@
 -define(EMPTY_ERROR, <<"empty_error">>).
 -define(STARTUP_TIMER, 5000).
 -define(MAX_POSTS, 200).
+% User
+-define(USER_ACCESS_TOKEN, access_token).
 
 
 %% TWITTERL DEFINES
@@ -33,6 +35,7 @@
 -define(API_VERSION, <<"1.0">>).
 
 -define(INVALID_SESSION, <<"invalid_session">>).
+-define(INVALID_USER, <<"invalid_user">>).
 -define(GPROC_UNKNOWN_PROCESS, <<"gproc_unknown_process">>).
 -define(INVALID_TOKEN_DATA, <<"invalid_token_data">>).
 
@@ -46,7 +49,6 @@
 -define(META_VERSION, 1).
 -define(TEST_TABLE_1_TTL,     60).
 -define(TEST_TABLE_2_TTL,     160).
--define(SESSION_TTL,     ?INFINITY).
 -define(POST_TTL,        ?INFINITY).
 -define(USER_TTL,        ?INFINITY).
 
@@ -152,14 +154,6 @@
           pretty_name                               :: binary()
          }).
 
--define(SESSION, session).
--record(session, {
-          id                                        :: binary(),
-          timestamp                                 :: timestamp(),
-          value                                     :: any(),
-          last_processed = 1                        :: integer()
-         }).
-
 -define(POST, post).
 -record(post, {
           id                                        :: twitter_id(),
@@ -174,7 +168,12 @@
           id                                        :: twitter_id(),
           timestamp                                 :: timestamp(),
           location                                  :: any(),
-          last_post_processed = ?FIRST_POST         :: integer(),
+          access_token                              :: token(),
+          access_token_secret                       :: secret(),
+          screen_name                               :: screen_name(),
+          user_id                                   :: user_id(),
+          profile_picture                           :: profile_picture(),
+          last_post_processed = ?FIRST_POST         :: post_id(),
           callback_pid                              :: callback_pid()
          }).
 
@@ -193,7 +192,8 @@
           table                                  :: table(),
           version                                :: table_version(),
           time_to_live                           :: time_to_live(),
-          type                                   :: table_type()
+          type                                   :: table_type(),
+          secondary_index_fields = []            :: list()
          }).
 
 
