@@ -100,6 +100,7 @@ handle_get([<<"mobs">>], Req0, _State) ->
                 Token ->
                     emob_user:get_posts(Token)
             end,
+    %% lager:debug("Found the foillowing posts:~n~p~n", [Posts]),
     Response = json_posts(Posts),
     cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req);
 
@@ -251,7 +252,10 @@ printable_path(Req) ->
 location_center([Lat, Lon]) ->
     {Lat, Lon};
 location_center([TopLat, LeftLon, BotLat, RightLon]) ->
-    {TopLat + (BotLat - TopLat) / 2, LeftLon + (RightLon - LeftLon) / 2}.
+    {TopLat + (BotLat - TopLat) / 2, LeftLon + (RightLon - LeftLon) / 2};
+location_center(_Location) ->
+    lager:debug("Invalid location ~p~n", [_Location]),
+    {null, null}.
 
 
 ok_to_ejson() ->
@@ -268,17 +272,26 @@ access_to_ejson(AccessData) ->
       {?SCREEN_NAME, AccessData#twitter_access_data.screen_name}]}.
 
 post_to_ejson(Post = #post{post_data = Tweet}) ->
-    User = Tweet#tweet.user,
     Rsvps = emob_post_receiver:get_rsvps(Post#post.id),
+    %% lager:debug("Rsvps: ~p~n", [Rsvps]),
+    {UserName, Going} = case Tweet#tweet.user of
+                            #twitter_user{screen_name = ScreenName, id_str = UserId} when is_binary(ScreenName) ->
+                                {ScreenName, lists:member(UserId, Rsvps)};
+                            _ ->
+                                {null, false}
+                        end,
+    lager:debug("User: ~p~n", [UserName]),
+    %% lager:debug("Post ID: ~p~n", [Post#post.id]),
+    {Lat, Lon} = location_center(Tweet#tweet.coordinates),
     {[{<<"id">>,      Post#post.id},
       {<<"tweet">>,   Tweet#tweet.text},
-      {<<"user">>,    User#twitter_user.screen_name},
+      {<<"user">>,    UserName},
       {<<"created">>, Tweet#tweet.created_at},
-      {<<"where">>, {[{<<"latitude">>, <<>>},
-                      {<<"longitude">>, <<>>}]}},
+      {<<"where">>, {[{<<"latitude">>, Lat},
+                      {<<"longitude">>, Lon}]}},
       {<<"when">>, <<>>},
-      {<<"rsvps">>, lists:length(Rsvps)},
-      {<<"going">>, lists:member(User#twitter_user.id_str, Rsvps)}]}.
+      {<<"rsvps">>, length(Rsvps)},
+      {<<"going">>, Going}]}.
 
 
 build_valid_response(Result) ->
