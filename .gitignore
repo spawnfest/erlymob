@@ -4,3 +4,4 @@ ebin/
 log/
 *.dump
 gproc_dist_erlymob@*
+Mnesia.emob@*
