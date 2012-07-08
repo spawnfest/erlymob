@@ -2,4 +2,5 @@
 -export([login/2]).
 
 login('GET', []) ->
+	RequestToken = emob_transport:get_request_token(),
 	{ok, []}.
