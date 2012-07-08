@@ -3,5 +3,34 @@
 {% block title %}Home &laquo; {% endblock %}
 
 {% block content %}
-	current local session id is: {{ session_id }}
+
+<div class="row">
+	<div class="span3">
+		<h2>User Stuff</h2>
+		<ul class="nav nav-list">
+			<li class="nav-header">
+				User
+			</li>
+			<li>
+				<strong>ID</strong> // {{ user_id }}
+			</li>
+			<li>
+				<strong>Name</strong> // {{ screen_name }}
+			</li>
+			<li class="nav-header">
+				Session
+			</li>
+			<li>
+				<strong>ID</strong> // {{ session_id }}
+			</li>
+			<li>
+				<strong>Token</strong> // {{ access_token }}
+			</li>
+		</ul>
+	</div>
+	<div class="span9">
+		<h2>Mobs</h2>
+	</div>
+</div>
+
 {% endblock %}
