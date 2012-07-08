@@ -49,8 +49,8 @@ get_access_token(OAuthToken, OAuthVerifier) ->
 get_mobs(AccessToken) ->
 	{access_token, Token} = AccessToken,
 	{ok, ApiUrl} = application:get_env(emob_ui, api_root),
-	%TargetUrl = lists:flatten(io_lib:format("~s/mobs?token=~s", [ApiUrl, Token])),
-	TargetUrl = lists:flatten(io_lib:format("~s/mobs", [ApiUrl])),
+	TargetUrl = lists:flatten(io_lib:format("~s/mobs?token=~s", [ApiUrl, Token])),
+	%TargetUrl = lists:flatten(io_lib:format("~s/mobs", [ApiUrl])),
 	case ibrowse:send_req(TargetUrl, [{"Accept", "application/json"}], get, [], [{response_format, binary}]) of
 		{ok, Code, Headers, Body} ->
 			try
