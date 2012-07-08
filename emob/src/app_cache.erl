@@ -34,7 +34,7 @@
         ]).
 
 %% Public APIs
--export([key_exists/2, get_data_from_index/3, get_data/2, get_last_data/1, get_after/2, set_data/1, remove_data/2]).
+-export([key_exists/2, get_data_from_index/3, get_data/2, get_bag_data/2, get_last_data/1, get_after/2, set_data/1, remove_data/2]).
 -export([test/0]).
 
 %% ------------------------------------------------------------------
@@ -53,7 +53,9 @@ tables() ->
      #table_info{table = ?TEST_TABLE_1,              version = 1, time_to_live = ?TEST_TABLE_1_TTL, type = ordered_set},
      #table_info{table = ?TEST_TABLE_2,              version = 1, time_to_live = ?TEST_TABLE_2_TTL, type = set},
      #table_info{table = ?POST,                      version = 1, time_to_live = ?POST_TTL, type = ordered_set},
-     #table_info{table = ?USER,                      version = 1, time_to_live = ?USER_TTL, type = set, secondary_index_fields = [access_token]}
+     #table_info{table = ?USER,                      version = 1, time_to_live = ?USER_TTL, type = set, secondary_index_fields = [access_token]},
+     #table_info{table = ?POST_RSVP,                 version = 1, time_to_live = ?POST_RSVP_TTL, type = bag},
+     #table_info{table = ?POST_IGNORE,               version = 1, time_to_live = ?POST_IGNORE_TTL, type = bag}
     ].
 
 
@@ -315,6 +317,10 @@ key_exists(Table, Key) ->
 get_data(Table, Key) ->
     read_data(Table, Key).
 
+-spec get_bag_data(Table::table(), Key::table_key()) -> any().
+get_bag_data(Table, Key) ->
+    read_bag_data(Table, Key).
+
 -spec get_data_from_index(Table::table(), Key::table_key(), IndexFieldPosition::table_key_position()) -> any().
 get_data_from_index(Table, Key, IndexFieldPosition) ->
     read_data_from_index(Table, Key, IndexFieldPosition).
@@ -355,6 +361,12 @@ read_data(Table, Key) ->
     TableTTL = cache_time_to_live(Table),
     CachedData = cache_entry(Table, Key),
     filter_data_by_ttl(TableTTL, CachedData).
+
+-spec read_bag_data(table(), table_key()) -> list().
+read_bag_data(Table, Key) ->
+    TableTTL = cache_time_to_live(Table),
+    CachedData = cache_bag_entry(Table, Key),
+    filter_bag_data_by_ttl(TableTTL, CachedData).
 
 -spec read_data_from_index(table(), table_key(), table_key()) -> list().
 read_data_from_index(Table, Key, IndexField) ->
@@ -415,6 +427,15 @@ cache_entry(Table, Key) ->
             Data;
         [] ->
             undefined
+    end.
+
+-spec cache_bag_entry(table(), table_key()) -> {last_update() | ?DEFAULT_TIMESTAMP, Data :: any() | 'undefined'}.
+cache_bag_entry(Table, Key) ->
+    case mnesia:dirty_read(Table, Key) of
+        [] ->
+            [];
+        Data ->
+            Data
     end.
 
 -spec cache_entry_from_index(table(), table_key(), table_key_position()) -> {last_update() | ?DEFAULT_TIMESTAMP, Data :: any() | 'undefined'}.
@@ -486,4 +507,13 @@ filter_data_by_ttl(TableTTL, Data) ->
             %% TODO: do something to trigger a cleanup
             []
     end.
+
+-spec filter_bag_data_by_ttl(TableTTL::timestamp(), Data::list()) -> any().
+filter_bag_data_by_ttl(TableTTL, Data) ->
+    CurrentTime = current_time_in_gregorian_seconds(),
+    lists:filter(fun(X) ->
+                LastUpdate = get_last_upate(X),
+                %% We store the datetime as seconds in the Gregorian calendar (since Jan 1, 0001 at 00:00:00).
+                is_cache_valid(TableTTL, LastUpdate, CurrentTime)
+        end, Data).
 

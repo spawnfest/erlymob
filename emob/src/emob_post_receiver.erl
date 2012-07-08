@@ -28,6 +28,8 @@
 
 % Testing
 -export([get_post/1]).
+-export([get_rsvps/1]).
+-export([get_ignores/1]).
 -export([get_all_posts/0]).
 -export([empty_posts/0]).
 
@@ -65,6 +67,24 @@ get_post(PostId) ->
             Post;
         _ ->
             undefined
+    end.
+
+-spec get_rsvps(post_id()) -> [user_id()] | error().
+get_rsvps(PostId) ->
+    case app_cache:get_bag_data(?POST_RSVP, PostId) of
+        [] ->
+            [];
+        Rsvps ->
+            [X#post_rsvp.rsvp_user || X <- Rsvps]
+    end.
+
+-spec get_ignores(post_id()) -> [user_id()] | error().
+get_ignores(PostId) ->
+    case app_cache:get_bag_data(?POST_IGNORE, PostId) of
+        [] ->
+            [];
+        Ignores ->
+            [X#post_ignore.ignore_user || X <- Ignores]
     end.
 
 
