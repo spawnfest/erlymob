@@ -112,7 +112,7 @@ init([Token, Secret]) ->
     State = #post_receiver_state{},
     {ok, State}.
 
-    
+
 
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
@@ -157,7 +157,7 @@ code_change(_OldVsn, State, _Extra) ->
 
 -spec process_tweets(pid(), token(), secret()) -> ok | pid().
 process_tweets(DestPid, Token, Secret) ->
-    SinceId = 
+    SinceId =
     case app_cache:get_last_data(?POST) of
         [] ->
             ?FIRST_POST;
@@ -165,12 +165,12 @@ process_tweets(DestPid, Token, Secret) ->
             Post#post.id
     end,
     SSinceId = emob_util:get_string(SinceId),
-    proc_lib:spawn_link(fun() -> 
+    proc_lib:spawn_link(fun() ->
                 %% TODO fix this so this happens only after init is completed
                 timer:sleep(?STARTUP_TIMER),
                 twitterl:statuses_home_timeline({process, DestPid}, [{"since_id", SSinceId}], Token, Secret),
                 %% TODO fill hole between these two requests
-                twitterl:statuses_user_timeline_stream({process, DestPid}, [], Token, Secret) 
+                twitterl:statuses_user_timeline_stream({process, DestPid}, [], Token, Secret)
         end).
 
 respond_to_post(Tweet) ->
@@ -186,6 +186,7 @@ respond_to_post(Tweet) ->
         true ->
             ResponseHash = "@" ++ SScreenName ++ "  erlymobaaaa",
             lager:debug("ResponseHash:~p, Id:~p, Token:~p, Secret:~p~n", [ResponseHash, Id, Token, Secret]),
-            Foo = twitterl:statuses_update({debug, foo}, [{"status", ResponseHash}, {"in_reply_to_status_id", Id}], Token, Secret),
-            lager:debug("Foo:~p~n", [Foo])
+            Result = twitterl:statuses_update({debug, foo}, [{"status", ResponseHash}, {"in_reply_to_status_id", Id}], Token, Secret),
+            lager:debug("Foo:~p~n", [Result]),
+            Result
     end.

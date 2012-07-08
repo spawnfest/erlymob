@@ -22,6 +22,7 @@
 -define(MAX_POSTS, 200).
 % User
 -define(USER_ACCESS_TOKEN, access_token).
+-define(ID, <<"id">>).
 
 
 %% TWITTERL DEFINES
@@ -125,7 +126,7 @@
             hashtags      :: list(),
             urls          :: list()
             }).
-            
+
 -record(tweet, {
             id_str        :: binary(),
             id            :: integer(),
