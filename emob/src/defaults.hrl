@@ -51,6 +51,8 @@
 -define(TEST_TABLE_2_TTL,     160).
 -define(POST_TTL,        ?INFINITY).
 -define(USER_TTL,        ?INFINITY).
+-define(POST_RSVP_TTL,   60*60*24*100).
+-define(POST_IGNORE_TTL, 60*60*24*100).
 
 -define(SCAVENGE_FACTOR, 5*1000).       %% 1000 'cos of microseconds
 
@@ -162,6 +164,22 @@
           post_data                                 :: #tweet{},
           processed = false                         :: post_processed_status()
          }).
+
+
+-define(POST_RSVP, post_rsvp).
+-record(post_rsvp, {
+          id                                        :: post_id(),
+          timestamp                                 :: timestamp(),
+          rsvp_user                                 :: user_id()
+         }).
+
+-define(POST_IGNORE, post_ignore).
+-record(post_ignore, {
+          id                                        :: post_id(),
+          timestamp                                 :: timestamp(),
+          ignore_user                               :: user_id()
+         }).
+
 
 -define(USER, user).
 %% TODO HACK! Fix get_position in dynarec

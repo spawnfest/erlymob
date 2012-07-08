@@ -28,6 +28,8 @@
 -export([set_callback/2]).
 
 -export([get_posts/1]).
+-export([rsvp_post/2]).
+-export([ignore_post/2]).
 -export([process_post/2]).
 -export([notify_all_users/1]).
 
@@ -61,8 +63,19 @@ set_callback(UserId, Callback) ->
 
 %%% POSTS
 %% @doc Retrieve the latest posts from the user
+-spec get_posts(user_id()) -> [#post{}] | error().
 get_posts(UserId) ->
     emob_manager:safe_call({?EMOB_USER, UserId}, {get_posts}).
+
+%% @doc RSVP to a post
+-spec rsvp_post(user_id(), post_id()) -> ok | error().
+rsvp_post(UserId, PostId) ->
+    emob_manager:safe_call({?EMOB_USER, UserId}, {rsvp_post, PostId}).
+
+%% @doc Ignore to a post
+-spec ignore_post(user_id(), post_id()) -> ok | error().
+ignore_post(UserId, PostId) ->
+    emob_manager:safe_call({?EMOB_USER, UserId}, {ignore_post, PostId}).
 
 %% @doc Process the incoming tweet
 %%          sent to Target
@@ -96,6 +109,16 @@ handle_call({get_user}, _From, State) ->
     UserId = State#state.user_id,
     User = get_user_data(UserId),
     Response = validate_user(User),
+    {reply, Response, State};
+
+handle_call({rsvp_post, PostId}, _From, State) ->
+    UserId = State#state.user_id,
+    Response = rsvp_post_internal(UserId, PostId),
+    {reply, Response, State};
+
+handle_call({ignore_post, PostId}, _From, State) ->
+    UserId = State#state.user_id,
+    Response = ignore_post_internal(UserId, PostId),
     {reply, Response, State};
 
 handle_call({set_callback, Callback}, _From, State) ->
@@ -149,6 +172,16 @@ get_user_data(UserId) ->
         _ ->
             #user{}
     end.
+
+-spec rsvp_post_internal(user_id(), post_id()) -> ok | error().
+rsvp_post_internal(UserId, PostId) ->
+    Entry = #post_rsvp{id = PostId, rsvp_user = UserId},
+    app_cache:set_data(Entry).
+
+-spec ignore_post_internal(user_id(), post_id()) -> ok | error().
+ignore_post_internal(UserId, PostId) ->
+    Entry = #post_ignore{id = PostId, ignore_user = UserId},
+    app_cache:set_data(Entry).
 
 -spec set_callback_internal(user_id(), target()) -> #user{}.
 set_callback_internal(UserId, Target) ->
