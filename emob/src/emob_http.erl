@@ -132,8 +132,25 @@ handle_get([<<"rsvp">>], Req0, _State) ->
                 Token ->
                     emob_user:rsvp_post(Token, PostId),
 
-                    Response = ejson:decode({[{<<"going">>, true}]}),
+                    Response = ejson:encode({[{<<"going">>, true}]}),
                     cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req)
+            end
+    end;
+
+handle_get([<<"get_loc">>], Req0, _State) ->
+    {Args, Req} = cowboy_http_req:body_qs(Req0),
+    case proplists:get_value(?TOKEN, Args) of
+        undefined ->
+            cowboy_http_req:reply(400, Req);   %% bad request
+        %% /get_loc?token=:token
+        Token ->
+            case emob_user:get_user(Token) of
+                [#user{location = Location}] ->
+                    {Lat, Lon} = location_center(Location),
+                    Response = ejson:encode({[{<<"latitude">>, Lat}, {<<"longitude">>, Lon}]}),
+                    cowboy_http_req:reply(200, [{?HEADER_CONTENT_TYPE, <<?MIME_TYPE_JSON>>}], Response, Req);
+                _ ->
+                    cowboy_http_req:reply(404, Req)   %% not found
             end
     end;
 
@@ -229,6 +246,12 @@ printable_peer(Req) ->
 printable_path(Req) ->
     {Path, _} = cowboy_http_req:raw_path(Req),
     Path.
+
+
+location_center([Lat, Lon]) ->
+    {Lat, Lon};
+location_center([TopLat, LeftLon, BotLat, RightLon]) ->
+    {TopLat + (BotLat - TopLat) / 2, LeftLon + (RightLon - LeftLon) / 2}.
 
 
 ok_to_ejson() ->
