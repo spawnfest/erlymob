@@ -25,6 +25,8 @@
 %% ------------------------------------------------------------------
 
 -export([get_user/1]).
+-export([set_callback/2]).
+
 -export([get_posts/1]).
 -export([process_post/2]).
 -export([notify_all_users/1]).
@@ -48,14 +50,19 @@
 %% ------------------------------------------------------------------
 %% API Function Definitions
 %% ------------------------------------------------------------------
-
-%% @doc Retrieve the latest posts from the user
-get_posts(UserId) ->
-    emob_manager:safe_call({?EMOB_USER, UserId}, {get_posts}).
-
+%%% USER
 %% @doc Get the User profile
 get_user(UserId) ->
     emob_manager:safe_call({?EMOB_USER, UserId}, {get_user}).
+
+-spec set_callback(user_id(), target()) -> ok | error().
+set_callback(UserId, Callback) ->
+    emob_manager:safe_call({?EMOB_USER, UserId}, {set_callback, Callback}).
+
+%%% POSTS
+%% @doc Retrieve the latest posts from the user
+get_posts(UserId) ->
+    emob_manager:safe_call({?EMOB_USER, UserId}, {get_posts}).
 
 %% @doc Process the incoming tweet
 %%          sent to Target
@@ -66,7 +73,7 @@ process_post(UserId, PostId) ->
 % TODO have callback users in a seperate table, efficiently notify them, etc.
 notify_all_users(Post) ->
     UserFun = fun() -> mnesia:foldl(fun(X, Acc) ->
-                    CallbackPid = X#user.callback_pid,
+                    CallbackPid = X#user.callback,
                     twitterl:respond_to_target({process, CallbackPid}, {post, Post}),
                     Acc
                 end, [], ?USER) end,
@@ -85,22 +92,22 @@ init([UserId]) ->
     State = #state{user_id = UserId},
     {ok, State}.
 
+handle_call({get_user}, _From, State) ->
+    UserId = State#state.user_id,
+    User = get_user_data(UserId),
+    Response = validate_user(User),
+    {reply, Response, State};
+
+handle_call({set_callback, Callback}, _From, State) ->
+    UserId = State#state.user_id,
+    Response = set_callback_internal(UserId, Callback),
+    {reply, Response, State};
+
 handle_call({get_posts}, _From, State) ->
     UserId = State#state.user_id,
     User = get_user_data(UserId),
     Posts = update_posts_from_cache(User),
     {reply, {ok, Posts}, State};
-
-handle_call({get_user}, _From, State) ->
-    UserId = State#state.user_id,
-    User = get_user_data(UserId),
-    Response = 
-    if User#user.id  =:= UserId ->
-            {ok, User};
-        true ->
-            {error, ?INVALID_USER}
-    end,
-    {reply, Response, State};
 
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
@@ -127,6 +134,13 @@ code_change(_OldVsn, State, _Extra) ->
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
 
+validate_user(User) ->
+    if User#user.id  =/= undefined ->
+            User;
+        true ->
+            {error, ?INVALID_USER}
+    end.
+
 -spec get_user_data(user_id()) -> #user{}.
 get_user_data(UserId) ->
     case app_cache:get_data(?USER, UserId) of
@@ -134,6 +148,15 @@ get_user_data(UserId) ->
             User;
         _ ->
             #user{}
+    end.
+
+-spec set_callback_internal(user_id(), target()) -> #user{}.
+set_callback_internal(UserId, Target) ->
+    case app_cache:get_data(?USER, UserId) of
+        [User] ->
+            app_cache:set_data(User#user{callback = Target});
+        _ ->
+            {error, ?INVALID_USER}
     end.
 
 -spec update_posts_from_cache(#user{}) -> list().
@@ -154,7 +177,7 @@ update_posts_from_cache(User) ->
     end.
 
 notify_user(User, PostId) ->
-    TargetPid = User#user.callback_pid,
+    TargetPid = User#user.callback,
     case TargetPid =/= undefined of
         true ->
             Post = app_cache:get(?POST, PostId),

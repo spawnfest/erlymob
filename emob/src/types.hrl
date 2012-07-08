@@ -19,6 +19,7 @@
 -type last_update()     :: timestamp().
 -type time_to_live()    :: non_neg_integer().
 -type index_fields()    :: [table_key()].
+-type target()          :: twitterl:target().
 
 -type app_field()                       :: atom().
 

@@ -174,7 +174,7 @@
           user_id                                   :: user_id(),
           profile_picture                           :: profile_picture(),
           last_post_processed = ?FIRST_POST         :: post_id(),
-          callback_pid                              :: callback_pid()
+          callback                                  :: target()
          }).
 
 
