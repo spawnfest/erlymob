@@ -58,17 +58,13 @@ process_post(UserId, PostId) ->
     emob_manager:safe_cast({?EMOB_USER, UserId}, {process_post, PostId}).
 
 %% @doc Notify all the users that a new post exists
-notify_all_users(PostId) ->
-    Post = app_cache:get_data(?POST, PostId),
-    UserFun = mnesia:foldl(fun(X, Acc) ->
+% TODO have callback users in a seperate table, efficiently notify them, etc.
+notify_all_users(Post) ->
+    UserFun = fun() -> mnesia:foldl(fun(X, Acc) ->
                     CallbackPid = X#user.callback_pid,
-                    case is_process_alive(CallbackPid) of
-                        true ->
-                            CallbackPid ! {post, Post},
-                            Acc;
-                        false ->
-                            Acc
-                    end end, [], ?USER),
+                    twitterl:respond_to_target({process, CallbackPid}, {post, Post}),
+                    Acc
+                end, [], ?USER) end,
     mnesia:transaction(UserFun).
 
 %% ------------------------------------------------------------------
@@ -127,12 +123,16 @@ get_user(UserId) ->
 -spec update_posts_from_cache(#user{}) -> list().
 update_posts_from_cache(User) ->
     case app_cache:get_after(User#user.last_post_processed) of
-        [_|_] ->
+        [_H|_Tail] ->
             AllPosts = app_cache:get_after(User#user.last_post_processed),
-            SortedPosts = lists:reverse(lists:keysort(2, AllPosts)),
+            SortedPosts = lists:sort(fun(A,B) -> A#post.id >= B#post.id end, AllPosts),
             LimitedPosts = lists:sublist(SortedPosts, ?MAX_POSTS),
-            [LastPost|_] = LimitedPosts,
-            app_cache:set_data(?USER, User#user{last_post_processed = LastPost#post.id}),
+            case LimitedPosts of
+                [LastPost|_] ->
+                    app_cache:set_data(?USER, User#user{last_post_processed = LastPost#post.id});
+                [] ->
+                    void
+            end,
             LimitedPosts;
         _ ->
             []
@@ -140,10 +140,10 @@ update_posts_from_cache(User) ->
 
 notify_user(User, PostId) ->
     TargetPid = User#user.callback_pid,
-    case is_process_alive(TargetPid) of
+    case TargetPid =/= undefined of
         true ->
             Post = app_cache:get(?POST, PostId),
-            TargetPid ! {post, Post};
+            twitterl:respond_to_target({process, TargetPid}, {post, Post});
         false ->
-            undefined
+            void
     end.

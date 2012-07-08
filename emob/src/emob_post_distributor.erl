@@ -65,13 +65,13 @@ handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
 handle_cast({distribute_post, PostId}, State) ->
-    [Post] = app_cache:get_data(?POST, PostId),
-    case Post#post.processed of
+    {IsProcessed, Post} = get_processed_status_and_post(PostId),
+    case IsProcessed of
         true ->
             ok;
         false ->
-            send_posts_to_users(PostId),
-            app_cache:set_data(Post#post{processed = true})
+            send_post_to_users(Post),
+            set_post_to_processed(Post)
     end,
     {noreply, State};
 
@@ -90,10 +90,19 @@ code_change(_OldVsn, State, _Extra) ->
 %% ------------------------------------------------------------------
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
-send_posts_to_users(AllPosts) ->
-    % TODO gen_event?
-    lists:foreach(fun(Post) ->
-                emob_user:notify_all_users(Post)
-                end, AllPosts).
+-spec get_processed_status_and_post(post_id()) -> {post_processed_status(), #post{}}.
+get_processed_status_and_post(PostId) ->
+    case app_cache:get_data(?POST, PostId) of
+        [Post] ->
+            {Post#post.processed, Post};
+        _ ->
+            {false, #post{}}
+    end.
 
+-spec send_post_to_users(#post{}) -> ok | error().
+send_post_to_users(Post) ->
+    emob_user:notify_all_users(Post).
 
+-spec set_post_to_processed(#post{}) -> ok | error().
+set_post_to_processed(Post) ->
+    app_cache:set_data(Post#post{processed = true}).

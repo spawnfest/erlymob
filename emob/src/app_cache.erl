@@ -53,7 +53,8 @@ tables() ->
      #table_info{table = ?TEST_TABLE_1,              version = 1, time_to_live = ?TEST_TABLE_1_TTL, type = ordered_set},
      #table_info{table = ?TEST_TABLE_2,              version = 1, time_to_live = ?TEST_TABLE_2_TTL, type = set},
      #table_info{table = ?SESSION,                   version = 1, time_to_live = ?SESSION_TTL,          type = set},
-     #table_info{table = ?POST,                      version = 1, time_to_live = ?POST_TTL, type = ordered_set}
+     #table_info{table = ?POST,                      version = 1, time_to_live = ?POST_TTL, type = ordered_set},
+     #table_info{table = ?USER,                      version = 1, time_to_live = ?USER_TTL, type = set}
     ].
 
 

@@ -26,6 +26,9 @@
 
 -export([process_post/1]).
 
+% Testing
+-export([empty_posts/0]).
+
 %% ------------------------------------------------------------------
 %% gen_server Function Exports
 %% ------------------------------------------------------------------
@@ -49,8 +52,13 @@
 
 %% @doc Process the incoming tweet
 %%          sent to Target
+-spec process_post(#post{}) -> ok.
 process_post(Post) ->
     emob_manager:safe_cast({?EMOB_POST_RECEIVER, ?EMOB_POST_RECEIVER}, {process_post, Post}).
+
+-spec empty_posts() -> {atomic, ok} | error().
+empty_posts() ->
+    mnesia:clear_table(?POST).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Definitions
@@ -83,8 +91,7 @@ handle_cast({process_post, Tweet}, State) ->
                     id = PostId,
                     post_data = Tweet},
             app_cache:set_data(PostRecord),
-%            twitterl_post_distributor:distribute_post(PostId);
-            ok;
+            emob_post_distributor:distribute_post(PostId);
         true ->
             ok
     end,
@@ -96,10 +103,6 @@ handle_cast(_Msg, State) ->
 %% @doc Get the tweet from twitterl
 handle_info(Tweet, State) when is_record(Tweet, tweet) ->
     process_post(Tweet),
-    {noreply, State};
-
-handle_info({'EXIT',  _Pid, _Reason}, State) ->
-    lager:error("twitterl streamer exited~n", []),
     {noreply, State};
 
 handle_info(_Info, State) ->
@@ -126,7 +129,9 @@ process_tweets(DestPid, Token, Secret) ->
     end,
     SSinceId = emob_util:get_string(SinceId),
     proc_lib:spawn_link(fun() -> 
+                %% TODO fix this so this happens only after init is completed
                 timer:sleep(?STARTUP_TIMER),
                 twitterl:statuses_home_timeline({process, DestPid}, [{"since_id", SSinceId}], Token, Secret),
+                %% TODO fill hole between these two requests
                 twitterl:statuses_user_timeline_stream({process, DestPid}, [], Token, Secret) 
         end).

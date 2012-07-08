@@ -157,7 +157,7 @@
           id                                        :: binary(),
           timestamp                                 :: timestamp(),
           value                                     :: any(),
-          last_processed                            :: integer()
+          last_processed = 1                        :: integer()
          }).
 
 -define(POST, post).
@@ -166,7 +166,7 @@
           timestamp                                 :: timestamp(),
           location                                  :: any(),
           post_data                                 :: #tweet{},
-          processed                                 :: boolean()
+          processed = false                         :: post_processed_status()
          }).
 
 -define(USER, user).

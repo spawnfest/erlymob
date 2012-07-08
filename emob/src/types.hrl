@@ -36,5 +36,7 @@
 %% emob
 -type user_id()                               :: binary().
 -type callback_pid()                          :: pid() | atom().
+-type post_id()                               :: integer().
+-type post_processed_status()                 :: boolean().
 
 
