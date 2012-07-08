@@ -1,0 +1,51 @@
+{% extends "layout/application.html" %}
+
+{% block title %}The Team &laquo; {% endblock %}
+
+{% block content %}
+
+<div class="row">
+	<div class="span4">
+		<div class="gravatar" style="background-image: url('http://gravatar.com/avatar/204a87f81a0d9764c1f3364f53e8facf?size=370')"></div>
+		<h2>Mahesh Paolini-Subramanya</h2>
+		<p>Mahesh's blerb will go here.</p>
+		<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc sit amet tellus nunc, sit amet congue tellus. Quisque vel dolor leo. Morbi blandit justo id eros posuere ut blandit turpis elementum.</p>
+	</div>
+	<div class="span4">
+		<div class="gravatar" style="background-image: url('http://gravatar.com/avatar/27f456e7619d28bda46aa93a704c84fe?size=370')"></div>
+		<h2>Juan Jos&eacute; Comellas</h2>
+		<p>JuanJo's blerb will go here.</p>
+		<p>Pellentesque metus mi, ornare a aliquet congue, eleifend at libero. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+	</div>
+	<div class="span4">
+		<div class="gravatar" style="background-image: url('http://gravatar.com/avatar/318fd413a64dccc9c8dcfeeb4de46f6b?size=370')"></div>
+		<h2>Tom Heinan</h2>
+		<p>Hi, my name is Tom and I'm a 25-year-old software engineer currently living in Atlanta, GA. I went to school at <a href="http://acadiau.ca/" target="_blank">Acadia University</a> and I'm currently writing mobile apps for a VoIP company called <a href="http://www.vocalocity.com/" target="_blank">Vocalocity</a>.</p>
+		<p>I mostly work on front-end stuff in Objective-C and Ruby, so the Erlymob UI is my first foray into Erlang (via <a href="http://www.chicagoboss.org/" target="_blank">Chicago Boss</a>).</p>
+		<p>
+			<a href="http://tomheinan.com/" target="_blank"><img src="/static/images/icons/wordpress_32.png"></a>
+			<a href="http://twitter.com/tomheinan" target="_blank"><img src="/static/images/icons/twitter_32.png"></a>
+			<a href="http://steamcommunity.com/id/tomheinan" target="_blank"><img src="/static/images/icons/steam_32.png"></a>
+			<a href="mailto:me@tomheinan.com" target="_blank"><img src="/static/images/icons/email_32.png"></a>
+		</p>
+	</div>
+</div>
+
+<hr>
+
+<div class="row">
+	<div class="span=12">
+		<h2>Special Thanks</h2>
+		<ul class="unstyled">
+			<li><a href="http://www.komodomedia.com/" target="_blank">Komodo Media</a>, for the <a href="http://www.komodomedia.com/blog/2009/06/social-network-icon-pack/" target="_blank">Social Network Icon Pack</a></li>
+		</ul>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$('.gravatar').each(function() {
+		$(this).height($(this).width());
+	});
+</script>
+
+{% endblock %}

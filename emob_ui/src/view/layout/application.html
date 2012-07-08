@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>{% block title %}{% endblock %}Erlymob</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="">
+		<meta name="author" content="Mahesh Paolini-Subramanya, Juan Jose Comellas, Tom Heinan">
+
+		<!-- css -->
+		<link rel="stylesheet" href="/static/css/bootstrap.css">
+		<link rel="stylesheet" href="/static/css/bootstrap-responsive.css">
+		<link rel="stylesheet" href="/static/css/erlymob.css">
+
+		<!-- js -->
+		<script type="text/javascript" src="/static/js/jquery.js"></script>
+		<script type="text/javascript" src="/static/js/bootstrap.js"></script>
+
+	</head>
+
+	<body>
+
+		<!-- navbar -->
+		<nav class="navbar navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container">
+					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</a>
+					<a href="/" class="brand"><img src="/static/images/logo.png" alt="Erlymob"></a>
+					<div class="nav-collapse">
+			  
+						<ul class="nav actions">
+							<li><a href="{% url controller="authentication" action="login" %}"><img src="/static/images/buttons/sign-in-with-twitter.png" alt="Sign in with Twitter"></a></li>
+						</ul>
+				
+						<ul class="nav">
+							<li><a href="{% url controller="info" action="about" %}">About Erlymob</a></li>
+							<li><a href="{% url controller="info" action="team" %}">The Team</a></li>
+						</ul>
+					</div><!--/.nav-collapse -->
+				</div>
+			</div>
+		</nav>
+
+		<div class="spacer visible-desktop"></div>
+
+		<div class="container">
+			{% block content %}
+			this is where the page content goes
+			{% endblock %}
+
+			<hr>
+
+			<footer>
+				<p>Copyright &copy; 2012 Team Erlymob</p>
+			</footer>
+		</div>
+
+	</body>
+</html>

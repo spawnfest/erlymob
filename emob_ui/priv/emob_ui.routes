@@ -13,8 +13,16 @@
 %
 % Note that routing across applications results in a 302 redirect.
 
-% Front page
+% front page
 {"/", [{controller, "index"}, {action, "home"}]}.
+{"/welcome", [{controller, "index"}, {action, "landing_page"}]}.
+
+% info pages
+{"/about", [{controller, "info"}, {action, "about"}]}.
+{"/team", [{controller, "info"}, {action, "team"}]}.
+
+% auth
+{"/login", [{controller, "authentication"}, {action, "login"}]}.
 
 % 404 File Not Found handler
 % {404, [{controller, "world"}, {action, "lost"}]}.

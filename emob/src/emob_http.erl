@@ -94,7 +94,7 @@ handle_get([<<"get_request_token">>], Req, _State) ->
     %% Here, the callback_url is in the body of the GET request
     {Args, _Req0} = cowboy_http_req:body_qs(Req),
     URL = proplists:get_value(?CALLBACK_URL, Args),
-    Response = 
+    Response =
     case emob_oauth_fsm:get_request_token(URL) of
         TokenData when is_record(TokenData, twitter_token_data) ->
             json_token(TokenData);
@@ -108,7 +108,7 @@ handle_get([<<"get_access_token">>], Req, _State) ->
     {Args, _Req0} = cowboy_http_req:qs_vals(Req),
     Token = proplists:get_value(?OAUTH_TOKEN, Args),
     Verifier = proplists:get_value(?OAUTH_VERIFIER, Args),
-    Response = 
+    Response =
     case emob_oauth_fsm:get_access_token(Token, Verifier) of
        AccessData when is_record(AccessData, twitter_access_data) ->
             json_access(AccessData);
@@ -123,7 +123,7 @@ handle_get([<<"get_credentials">>], Req, _State) ->
     {Args, _Req0} = cowboy_http_req:body_qs(Req),
     Token = proplists:get_value(?OAUTH_TOKEN, Args),
     lager:debug("Token:~p~n", [Token]),
-    Response = 
+    Response =
     case emob_oauth_fsm:get_credentials(Token) of
        AccessData when is_record(AccessData, twitter_access_data) ->
             lager:debug("1:~p~n", [AccessData]),
@@ -213,18 +213,18 @@ build_error_response({error, Error}) ->
       {version, ?API_VERSION}]}.
 
 json_error(Error) ->
-            ejson:encode(build_error_response(Error)).
+    ejson:encode(build_error_response(Error)).
 
 json_ok() ->
     Result = ok_to_ejson(),
     ejson:encode(build_valid_response(Result)).
 
 json_access(AccessData) ->
-            Result = access_to_ejson(AccessData),
-            ejson:encode(build_valid_response(Result)).
+    Result = access_to_ejson(AccessData),
+    ejson:encode(build_valid_response(Result)).
 
 json_token(TokenData) ->
-            Result = token_to_ejson(TokenData),
-            ejson:encode(build_valid_response(Result)).
+    Result = token_to_ejson(TokenData),
+    ejson:encode(build_valid_response(Result)).
 
 
