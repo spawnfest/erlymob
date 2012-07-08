@@ -54,7 +54,7 @@
 					var date = new Date(mob.created);
 
 					var html = '<h3>"'+mob.tweet.replace(/@erlymob_test\s*/, '')+'"</h3>'
-						+'<h4>#mob</h4>'
+						+'<h4><a class="text" href="https://twitter.com/#!/search/%23mob'+mob.id+'" target="_blank">#mob'+mob.id+'</a></h4>'
 						+'<h6>Posted by <a class="text" href="http://twitter.com/'+mob.user+'" target="_blank">@'+mob.user+'</a> '
 						+'on '+date.toUTCString()+'</h6>';
 
