@@ -9,8 +9,16 @@
 
 -include("types.hrl").
 
+%% EMOB DEFINES
+-define(EMOB_POST_RECEIVER, emob_post_receiver).
+-define(EMOB_POST_DISTRIBUTOR, emob_post_distributor).
+-define(LATEST, <<"latest">>).
+-define(INVALID_BOOLEAN, <<"invalid_boolean">>).
+-define(INVALID_BINARY, <<"invalid_binary">>).
+-define(INVALID_STRING, <<"invalid_string">>).
+-define(EMPTY_ERROR, <<"empty_error">>).
 
-
+%% TWITTERL DEFINES
 -define(CALLBACK_URL, <<"callback_url">>).
 -define(TOKEN, <<"token">>).
 -define(OAUTH_TOKEN, <<"oauth_token">>).
@@ -27,12 +35,15 @@
 -define(DEFAULT_TIMER_TIMEOUT, 5000).
 -define(OAUTH_FSM, oauth_fsm).
 
+-define(FIRST_POST, 1).
+
 %% APP_CACHE DEFINES
 -define(INFINITY,     infinity).
 -define(META_VERSION, 1).
 -define(TEST_TABLE_1_TTL,     60).
 -define(TEST_TABLE_2_TTL,     160).
 -define(SESSION_TTL,     ?INFINITY).
+-define(POST_TTL,        ?INFINITY).
 
 -define(SCAVENGE_FACTOR, 5*1000).       %% 1000 'cos of microseconds
 
@@ -41,48 +52,6 @@
 -define(DEFAULT_TIMESTAMP, undefined).
 
 -define(METATABLE, app_metatable).
-
-%% APP_CACHE TABLES and records
-%% All tables must have a field called timestamp. Somewhere. For sure.
--define(TEST_TABLE_1, test_table_1).
--record(test_table_1, {
-          key                                       :: binary(),
-          timestamp                                 :: timestamp(),
-          value                                     :: binary()
-         }).
-
--define(TEST_TABLE_2, test_table_2).
--record(test_table_2, {
-          id                                        :: binary(),
-          timestamp                                 :: timestamp(),
-          name                                      :: binary(),
-          pretty_name                               :: binary()
-         }).
-
--define(SESSION, session).
--record(session, {
-          id                                        :: binary(),
-          timestamp                                 :: any(),
-          value                                     :: any()
-         }).
-
-%% APP_CACHE METADATA
--record(app_metatable, {
-          table                                             :: table(),
-          version                                           :: table_version(),
-          time_to_live                                      :: time_to_live(),    %% in seconds
-          type                                              :: table_type(),
-          last_update                                       :: non_neg_integer(),
-          reason                                            :: any()
-         }).
-
--record(table_info, {
-          table                                  :: table(),
-          version                                :: table_version(),
-          time_to_live                           :: time_to_live(),
-          type                                   :: table_type()
-         }).
-
 
 %% TWITTER SPECIFIC RECORDS
 
@@ -158,5 +127,59 @@
             entities      :: #entities{}
             }).
 
+
+
+
+%% APP_CACHE TABLES and records
+%% All tables must have a field called timestamp. Somewhere. For sure.
+-define(TEST_TABLE_1, test_table_1).
+-record(test_table_1, {
+          key                                       :: binary(),
+          timestamp                                 :: timestamp(),
+          value                                     :: binary()
+         }).
+
+-define(TEST_TABLE_2, test_table_2).
+-record(test_table_2, {
+          id                                        :: binary(),
+          timestamp                                 :: timestamp(),
+          name                                      :: binary(),
+          pretty_name                               :: binary()
+         }).
+
+-define(SESSION, session).
+-record(session, {
+          id                                        :: binary(),
+          timestamp                                 :: timestamp(),
+          value                                     :: any(),
+          last_processed                            :: integer()
+         }).
+
+-define(POST, post).
+-record(post, {
+          id                                        :: twitter_id(),
+          timestamp                                 :: timestamp(),
+          location                                  :: any(),
+          post_data                                 :: #tweet{},
+          processed                                 :: boolean()
+         }).
+
+
+%% APP_CACHE METADATA
+-record(app_metatable, {
+          table                                             :: table(),
+          version                                           :: table_version(),
+          time_to_live                                      :: time_to_live(),    %% in seconds
+          type                                              :: table_type(),
+          last_update                                       :: non_neg_integer(),
+          reason                                            :: any()
+         }).
+
+-record(table_info, {
+          table                                  :: table(),
+          version                                :: table_version(),
+          time_to_live                           :: time_to_live(),
+          type                                   :: table_type()
+         }).
 
 

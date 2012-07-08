@@ -34,7 +34,7 @@
         ]).
 
 %% Public APIs
--export([get_data/2, get_after/2, set_data/1, remove_data/2]).
+-export([key_exists/2, get_data/2, get_last_data/1, get_after/2, set_data/1, remove_data/2]).
 -export([test/0]).
 
 %% ------------------------------------------------------------------
@@ -51,8 +51,9 @@ test() ->
 tables() ->
     [
      #table_info{table = ?TEST_TABLE_1,              version = 1, time_to_live = ?TEST_TABLE_1_TTL, type = ordered_set},
-     #table_info{table = ?TEST_TABLE_2,              version = 1, time_to_live = ?TEST_TABLE_2_TTL, type = set}
-     #table_info{table = ?SESSION,                   version = 1, time_to_live = ?SESSION_TTL,          type = set}
+     #table_info{table = ?TEST_TABLE_2,              version = 1, time_to_live = ?TEST_TABLE_2_TTL, type = set},
+     #table_info{table = ?SESSION,                   version = 1, time_to_live = ?SESSION_TTL,          type = set},
+     #table_info{table = ?POST,                      version = 1, time_to_live = ?POST_TTL, type = ordered_set}
     ].
 
 
@@ -302,9 +303,17 @@ last_update_to_datetime(LastUpdate) ->
 %%
 %% Table accessors
 %%
+-spec key_exists(Table::table(), Key::table_key()) -> any().
+key_exists(Table, Key) ->
+    check_key_exists(Table, Key).
+
 -spec get_data(Table::table(), Key::table_key()) -> any().
 get_data(Table, Key) ->
     read_data(Table, Key).
+
+-spec get_last_data(Table::table()) -> any().
+get_last_data(Table) ->
+    read_last_data(Table).
 
 %% Get data after (in erlang term order) a value
 -spec get_after(table(), table_key()) -> any().
@@ -322,10 +331,27 @@ remove_data(Table, Key) ->
 %%====================================================================
 %% Internal functions
 %%====================================================================
+-spec check_key_exists(table(), table_key()) -> boolean().
+check_key_exists(Table, Key) ->
+    TableTTL = cache_time_to_live(Table),
+    CachedData = cache_entry(Table, Key),
+    case filter_data_by_ttl(TableTTL, CachedData) of
+        [_Data] ->
+            true;
+        _ ->
+            false
+    end.
+
 -spec read_data(table(), table_key()) -> list().
 read_data(Table, Key) ->
     TableTTL = cache_time_to_live(Table),
     CachedData = cache_entry(Table, Key),
+    filter_data_by_ttl(TableTTL, CachedData).
+
+-spec read_last_data(table()) -> list().
+read_last_data(Table) ->
+    TableTTL = cache_time_to_live(Table),
+    CachedData = cache_last_entry(Table),
     filter_data_by_ttl(TableTTL, CachedData).
 
 -spec read_after(table(), table_key()) -> list().
@@ -375,6 +401,15 @@ cache_entry(Table, Key) ->
             Data;
         [] ->
             undefined
+    end.
+
+-spec cache_last_entry(table()) -> {last_update() | ?DEFAULT_TIMESTAMP, Data :: any() | 'undefined'}.
+cache_last_entry(Table) ->
+    case mnesia:dirty_first(Table) of
+        '$end_of_table' ->
+            undefined;
+        Key ->
+            cache_entry(Table, Key)
     end.
 
 

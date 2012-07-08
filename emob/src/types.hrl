@@ -30,5 +30,6 @@
 -type method()                                :: atom().
 -type string_method()                         :: string().
 -type params()                                :: list().
+-type twitter_id()                            :: integer().
 -type consumer()                              :: {string(), string(), atom()}.
 
