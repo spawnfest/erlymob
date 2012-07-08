@@ -26,6 +26,7 @@
 -export([get_process/1]).
 -export([register_process/2]).
 -export([safe_sync_send_event/2, safe_sync_send_event/3]).
+-export([safe_cast/2, safe_call/2, safe_call/3]).
 
 %%
 %% For testing
@@ -72,7 +73,55 @@ stop_oauth_fsm(Token) ->
     end.
 
 
-%% @doc Unified mechanism to send a gen_server call request to a supervised fsm
+%% @doc Unified mechanism to send a gen_server call request to a supervised process
+-spec safe_call({Type :: atom(), Name :: atom()} | atom(), Request :: any()) -> {ok, pid()} | {ok, Result :: any(), pid()} | error().
+safe_call({_Type, _Name} = Key, Request) ->
+    safe_call(Key, Request, ?DEFAULT_TIMER_TIMEOUT);
+
+safe_call(Type, Request) ->
+    safe_call(Type, Request, ?DEFAULT_TIMER_TIMEOUT).
+
+
+-spec safe_call({Type :: atom(), Name :: atom()} | atom(), Request::any(), timeout()) -> {ok, pid()} | {ok, Result :: any(), pid()} | error().
+safe_call({Type, Name}, Request, Timeout) ->
+    % Send the request to the process
+    case get_process({Type, Name}) of 
+        Pid when is_pid(Pid) ->
+            gen_server:call(Pid, Request, Timeout);
+        _ ->
+            {error, ?GPROC_UNKNOWN_PROCESS}
+    end;
+
+safe_call(Type, Request, Timeout) ->
+    % Send the request to the process
+    case get_process(Type) of 
+        Pid when is_pid(Pid) ->
+            gen_server:call(Pid, Request, Timeout);
+        _ ->
+            {error, ?GPROC_UNKNOWN_PROCESS}
+    end.
+
+%% @doc Unified mechanism to send a gen_server cast request to a supervised process
+-spec safe_cast({Type :: atom(), Name :: atom()} | atom(), Request :: any()) -> ok | error().
+safe_cast({Type, Name}, Request) ->
+    % Send the request to the process
+    case get_process({Type, Name}) of 
+        Pid when is_pid(Pid) ->
+            gen_server:cast(Pid, Request);
+        _ ->
+            {error, ?GPROC_UNKNOWN_PROCESS}
+    end;
+
+safe_cast(Type, Request) ->
+    % Send the request to the process
+    case get_process(Type) of 
+        Pid when is_pid(Pid) ->
+            gen_server:cast(Pid, Request);
+        _ ->
+            {error, ?GPROC_UNKNOWN_PROCESS}
+    end.
+
+%% @doc Unified mechanism to send a gen_fsm request to a supervised fsm
 -spec safe_sync_send_event({atom(), binary()} , Request :: any()) -> {ok, pid()} | {ok, Result :: any(), pid()} | error().
 safe_sync_send_event({_Type, _Name} = Key, Request) ->
     safe_sync_send_event(Key, Request, ?DEFAULT_TIMER_TIMEOUT);
