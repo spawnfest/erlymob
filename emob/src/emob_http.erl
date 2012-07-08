@@ -293,7 +293,7 @@ post_to_ejson(Post = #post{post_data = Tweet}) ->
       {<<"created">>, Tweet#tweet.created_at},
       {<<"where">>, {[{<<"latitude">>, Lat},
                       {<<"longitude">>, Lon}]}},
-      {<<"when">>, <<>>},
+      {<<"when">>, Tweet#tweet.created_at},
       {<<"rsvps">>, length(Rsvps)},
       {<<"going">>, Going}]}.
 
